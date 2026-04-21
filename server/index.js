@@ -31,7 +31,7 @@ app.post('/api/orders', (req, res) => {
     address,
     items,
     totalPrice,
-    status: 'Accepted',
+    status: 'Pending',
     createdAt: new Date().toISOString(),
   }
 
@@ -45,6 +45,7 @@ app.get('/api/orders/:id', (req, res) => {
   if (!order) return res.status(404).json({ error: 'Order not found' })
   res.json(order)
 })
+
 
 app.listen(PORT, () => {
   console.log(`Server running: http://localhost:${PORT}`)

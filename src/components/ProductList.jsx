@@ -1,23 +1,23 @@
 import { useCart } from "../context/CartContext";
+import { PRODUCTS } from "../data/products";
 
-//move to api or const file later
-const PRODUCTS = [
-  { id: 1, name: "Laptop Pro", price: 75000, image: "💻" },
-  { id: 2, name: "Smartphone X", price: 45000, image: "📱" },
-  { id: 3, name: "Headphones", price: 8500, image: "🎧" },
-  { id: 4, name: "Keyboard", price: 5200, image: "⌨️" },
-  { id: 5, name: "Mouse", price: 3100, image: "🖱️" },
-  { id: 6, name: "Monitor", price: 32000, image: "🖥️" },
-];
-
-export default function ProductList() {
+export default function ProductList({ searchQuery = '', sortBy = 'default' }) {
   const { addToCart } = useCart();
+
+  const filtered = PRODUCTS
+    .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => {
+      if (sortBy === 'price-asc') return a.price - b.price
+      if (sortBy === 'price-desc') return b.price - a.price
+      if (sortBy === 'name-asc') return a.name.localeCompare(b.name)
+      return 0
+    })
 
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Products</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {PRODUCTS.map((product) => (
+        {filtered.map((product) => (
           <div
             key={product.id}
             className="bg-white rounded-xl shadow p-4 flex flex-col items-center gap-3"
@@ -36,6 +36,9 @@ export default function ProductList() {
           </div>
         ))}
       </div>
+      {filtered.length === 0 && (
+        <p className="text-center text-gray-400 mt-10">No products found</p>
+      )}
     </div>
   );
 }
