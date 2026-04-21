@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
 export default function CartDropdown({ onClose }) {
-  const { cart, total, changeQuantity, removeFromCart } = useCart();
+  const { cart, totalPrice, changeQuantity, removeFromCart } = useCart();
 
   return (
     <div className="absolute right-0 top-12 w-80 bg-white rounded-xl shadow-xl border z-50">
@@ -52,7 +52,7 @@ export default function CartDropdown({ onClose }) {
 
             <div className="mt-3 pt-3 border-t flex justify-between items-center">
               <span className="font-bold">
-                Total: {total.toLocaleString()} VND
+                Total: {totalPrice.toLocaleString()} VND
               </span>
             </div>
 

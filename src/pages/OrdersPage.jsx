@@ -57,7 +57,7 @@ export default function OrdersPage() {
                 ))}
               </ul>
               <div className="mt-3 pt-3 border-t font-bold text-right">
-                {order.total.toLocaleString()} VND
+                {order.totalPrice.toLocaleString()} VND
               </div>
             </li>
           ))}

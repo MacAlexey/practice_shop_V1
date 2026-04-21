@@ -1,7 +1,7 @@
 import { useCart } from '../context/CartContext'
 
 export default function Cart({ onCheckout }) {
-  const { cart, removeFromCart, changeQuantity, total } = useCart()
+  const { cart, removeFromCart, changeQuantity, totalPrice } = useCart()
 
   if (cart.length === 0) {
     return (
@@ -33,7 +33,7 @@ export default function Cart({ onCheckout }) {
         ))}
       </ul>
       <div className="mt-4 pt-4 border-t flex justify-between items-center">
-        <span className="font-bold text-lg">Total: {total.toLocaleString()} VND</span>
+        <span className="font-bold text-lg">Total: {totalPrice.toLocaleString()} VND</span>
         <button onClick={onCheckout} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition">
           Checkout
         </button>

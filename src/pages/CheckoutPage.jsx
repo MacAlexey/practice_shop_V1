@@ -4,7 +4,7 @@ import { useCart } from "../context/CartContext";
 import { createOrder } from "../api/orders";
 
 export default function CheckoutPage() {
-  const { cart, total, clearCart } = useCart();
+  const { cart, totalPrice, clearCart } = useCart();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
@@ -20,9 +20,15 @@ export default function CheckoutPage() {
     setError("");
 
     try {
-      await createOrder({ name: form.name, email: form.email, address: form.address, items: cart, total })
-      clearCart()
-      navigate('/orders')
+      await createOrder({
+        name: form.name,
+        email: form.email,
+        address: form.address,
+        items: cart,
+        totalPrice,
+      });
+      clearCart();
+      navigate("/orders");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -48,7 +54,7 @@ export default function CheckoutPage() {
         </ul>
         <div className="mt-3 pt-3 border-t font-bold flex justify-between">
           <span>Total</span>
-          <span>{total.toLocaleString()} VND</span>
+          <span>{totalPrice.toLocaleString()} VND</span>
         </div>
       </div>
 

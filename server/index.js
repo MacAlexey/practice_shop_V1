@@ -18,7 +18,7 @@ app.get('/api/orders', (req, res) => {
 
 // POST /api/orders — create new order
 app.post('/api/orders', (req, res) => {
-  const { name, email, address, items, total } = req.body
+  const { name, email, address, items, totalPrice } = req.body
 
   if (!name || !email || !address || !items || items.length === 0) {
     return res.status(400).json({ error: 'Please fill in all fields and add items to cart' })
@@ -30,7 +30,7 @@ app.post('/api/orders', (req, res) => {
     email,
     address,
     items,
-    total,
+    totalPrice,
     status: 'Accepted',
     createdAt: new Date().toISOString(),
   }

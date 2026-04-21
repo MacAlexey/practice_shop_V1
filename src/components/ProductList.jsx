@@ -1,5 +1,6 @@
 import { useCart } from "../context/CartContext";
 
+//move to api or const file later
 const PRODUCTS = [
   { id: 1, name: "Laptop Pro", price: 75000, image: "💻" },
   { id: 2, name: "Smartphone X", price: 45000, image: "📱" },
@@ -23,7 +24,9 @@ export default function ProductList() {
           >
             <span className="text-5xl">{product.image}</span>
             <h3 className="font-semibold text-lg">{product.name}</h3>
-            <p className="text-gray-500">{product.price.toLocaleString()} VND</p>
+            <p className="text-gray-500">
+              {product.price.toLocaleString()} VND
+            </p>
             <button
               onClick={() => addToCart(product)}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition"
