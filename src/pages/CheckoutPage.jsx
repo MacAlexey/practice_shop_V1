@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import { createOrder } from "../api/orders";
 
 export default function CheckoutPage() {
   const { cart, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    address: "",
-  });
+  const [form, setForm] = useState({ name: "", email: "", address: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -20,13 +18,19 @@ export default function CheckoutPage() {
     setError("");
 
     try {
-      await createOrder({
-        name: form.name,
-        email: form.email,
+      const order = await createOrder({
+        name: user ? user.name : form.name,
+        email: user ? user.email : form.email,
         address: form.address,
         items: cart,
         totalPrice,
       });
+
+      if (!user) {
+        const saved = JSON.parse(localStorage.getItem("guestOrders") || "[]");
+        localStorage.setItem("guestOrders", JSON.stringify([...saved, order]));
+      }
+
       clearCart();
       navigate("/orders");
     } catch (err) {
@@ -68,28 +72,47 @@ export default function CheckoutPage() {
         onSubmit={handleSubmit}
         className="bg-white rounded-xl shadow p-6 flex flex-col gap-4"
       >
-        <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
-          <input
-            type="text"
-            required
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            placeholder="your name"
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input
-            type="email"
-            required
-            value={form.email}
-            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            placeholder="your email"
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
+        {user ? (
+          <div className="text-sm text-gray-500 bg-gray-50 rounded-lg px-4 py-3">
+            <p>
+              <span className="font-medium text-gray-700">Name:</span>{" "}
+              {user.name}
+            </p>
+            <p>
+              <span className="font-medium text-gray-700">Email:</span>{" "}
+              {user.email}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div>
+              <label className="block text-sm font-medium mb-1">Name</label>
+              <input
+                type="text"
+                required
+                value={form.name}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, name: e.target.value }))
+                }
+                placeholder="Your name"
+                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <input
+                type="email"
+                required
+                value={form.email}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, email: e.target.value }))
+                }
+                placeholder="Your email"
+                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          </>
+        )}
         <div>
           <label className="block text-sm font-medium mb-1">
             Delivery Address
@@ -101,7 +124,7 @@ export default function CheckoutPage() {
             onChange={(e) =>
               setForm((f) => ({ ...f, address: e.target.value }))
             }
-            placeholder="your address"
+            placeholder="Your address"
             className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>

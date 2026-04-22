@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
+import { AuthProvider } from "./context/AuthContext";
 import { Toaster, toast, useToasterStore } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import AppRoutes from "./routes";
@@ -23,18 +24,20 @@ function ToastLimiter() {
 export default function App() {
   return (
     <BrowserRouter>
-      <CartProvider>
-        <div className="min-h-screen bg-grey-100">
-          <Navbar />
-          <Toaster
-            position="top-center"
-            containerStyle={{ zIndex: 9999 }}
-            toastOptions={{ duration: 2000 }}
-          />
-          <ToastLimiter />
-          <AppRoutes />
-        </div>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <div className="min-h-screen bg-grey-100">
+            <Navbar />
+            <Toaster
+              position="top-center"
+              containerStyle={{ zIndex: 9999 }}
+              toastOptions={{ duration: 2000 }}
+            />
+            <ToastLimiter />
+            <AppRoutes />
+          </div>
+        </CartProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

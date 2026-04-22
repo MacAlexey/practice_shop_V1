@@ -10,4 +10,3 @@ export function createOrder(orderData) {
     body: JSON.stringify(orderData),
   })
 }
-

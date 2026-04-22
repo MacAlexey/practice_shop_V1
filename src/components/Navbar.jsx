@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import CartDropdown from "./CartDropdown";
 
 export default function Navbar() {
   const { cart } = useCart();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -34,6 +36,25 @@ export default function Navbar() {
           >
             Orders
           </Link>
+
+          {user ? (
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition"
+            >
+              <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
+                {user.name[0].toUpperCase()}
+              </div>
+              <span className="text-sm">{user.name}</span>
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="text-gray-600 hover:text-blue-600 transition text-sm"
+            >
+              Sign In
+            </Link>
+          )}
 
           {/* Cart Button*/}
           <div className="relative" ref={ref}>

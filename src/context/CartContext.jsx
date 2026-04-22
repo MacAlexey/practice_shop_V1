@@ -3,10 +3,21 @@ import toast from "react-hot-toast";
 
 const CartContext = createContext();
 
+function getInitialKey() {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    return user ? `cart_${user.id}` : "cart_guest";
+  } catch {
+    return "cart_guest";
+  }
+}
+
 export function CartProvider({ children }) {
+  const [cartKey, setCartKey] = useState(getInitialKey);
+
   const [cart, setCart] = useState(() => {
     try {
-      const saved = localStorage.getItem("cart");
+      const saved = localStorage.getItem(getInitialKey());
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -14,8 +25,20 @@ export function CartProvider({ children }) {
   });
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+  }, [cart, cartKey]);
+
+  // Switch cart when user logs in or out
+  function switchToUser(userId) {
+    const key = userId ? `cart_${userId}` : "cart_guest";
+    setCartKey(key);
+    try {
+      const saved = localStorage.getItem(key);
+      setCart(saved ? JSON.parse(saved) : []);
+    } catch {
+      setCart([]);
+    }
+  }
 
   function addToCart(product) {
     setCart((prev) => {
@@ -66,6 +89,7 @@ export function CartProvider({ children }) {
         removeFromCart,
         changeQuantity,
         clearCart,
+        switchToUser,
         totalPrice,
       }}
     >

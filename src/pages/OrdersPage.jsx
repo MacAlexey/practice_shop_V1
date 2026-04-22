@@ -1,17 +1,26 @@
 import { useState, useEffect } from "react";
 import { getOrders } from "../api/orders";
+import { useAuth } from "../context/AuthContext";
 
 export default function OrdersPage() {
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!user) {
+      const guestOrders = JSON.parse(localStorage.getItem('guestOrders') || '[]')
+      setOrders(guestOrders)
+      setLoading(false)
+      return
+    }
+
     getOrders()
       .then((data) => setOrders(data))
       .catch(() => setError("Failed to load orders"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   if (loading)
     return <p className="text-center py-8 text-gray-400">Loading...</p>;
