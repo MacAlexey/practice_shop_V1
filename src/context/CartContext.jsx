@@ -3,6 +3,9 @@ import toast from "react-hot-toast";
 
 const CartContext = createContext();
 
+/**
+ * Returns cart_guest key for guests or cart_{id} key
+ * for logged-in users */
 function getInitialKey() {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -28,13 +31,33 @@ export function CartProvider({ children }) {
     localStorage.setItem(cartKey, JSON.stringify(cart));
   }, [cart, cartKey]);
 
-  // Switch cart when user logs in or out
+  /**
+   * Switches cart on login/logout.
+   * On login: merges guest cart into user cart without overwriting existing items.
+   * On logout: loads guest cart.
+   */
   function switchToUser(userId) {
     const key = userId ? `cart_${userId}` : "cart_guest";
     setCartKey(key);
     try {
-      const saved = localStorage.getItem(key);
-      setCart(saved ? JSON.parse(saved) : []);
+      const userCart = JSON.parse(localStorage.getItem(key) || "[]");
+
+      if (userId) {
+        const guestCart = JSON.parse(
+          localStorage.getItem("cart_guest") || "[]",
+        );
+        const merged = [...userCart];
+
+        guestCart.forEach((guestItem) => {
+          const exists = merged.find((item) => item.id === guestItem.id);
+          if (!exists) merged.push(guestItem);
+        });
+
+        localStorage.removeItem("cart_guest");
+        setCart(merged);
+      } else {
+        setCart(userCart);
+      }
     } catch {
       setCart([]);
     }
