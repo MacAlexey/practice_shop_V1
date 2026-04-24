@@ -1,10 +1,11 @@
-import { useState } from "react";
 import ProductList from "../components/ProductList";
 import SearchBar from "../components/SearchBar";
+import { PRODUCTS } from "../data/products";
+import { useProductFilter } from "../hooks/useProductFilter";
 
 export default function ShopPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("default");
+  const { filtered, searchQuery, setSearchQuery, sortBy, setSortBy } =
+    useProductFilter(PRODUCTS);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -14,7 +15,7 @@ export default function ShopPage() {
         sortBy={sortBy}
         onSort={setSortBy}
       />
-      <ProductList searchQuery={searchQuery} sortBy={sortBy} />
+      <ProductList products={filtered} />
     </div>
   );
 }

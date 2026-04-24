@@ -13,3 +13,19 @@ export function login(data) {
     body: JSON.stringify(data),
   })
 }
+
+export function refreshToken() {
+  const token = localStorage.getItem('refreshToken')
+  return request('/auth/refresh', {
+    method: 'POST',
+    body: JSON.stringify({ refreshToken: token }),
+  })
+}
+
+export function logout() {
+  const token = localStorage.getItem('refreshToken')
+  return request('/auth/logout', {
+    method: 'POST',
+    body: JSON.stringify({ refreshToken: token }),
+  })
+}

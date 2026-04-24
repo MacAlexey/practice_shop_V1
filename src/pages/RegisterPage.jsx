@@ -21,7 +21,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const data = await registerApi(form);
-      login(data.user, data.token);
+      login(data.user, data.accessToken, data.refreshToken);
       switchToUser(data.user.id);
       toast.success(`Welcome, ${data.user.name}!`);
       navigate("/");

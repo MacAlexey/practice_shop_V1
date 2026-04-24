@@ -1,6 +1,7 @@
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { logout as logoutApi } from "../api/auth";
 import toast from "react-hot-toast";
 
 export default function ProfilePage() {
@@ -8,7 +9,8 @@ export default function ProfilePage() {
   const { switchToUser } = useCart();
   const navigate = useNavigate();
 
-  function handleLogout() {
+  async function handleLogout() {
+    await logoutApi();
     switchToUser(null);
     logout();
     toast.success("Logged out");

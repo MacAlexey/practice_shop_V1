@@ -21,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await loginApi(form);
-      login(data.user, data.token);
+      login(data.user, data.accessToken, data.refreshToken);
       switchToUser(data.user.id);
       toast.success(`Welcome back, ${data.user.name}!`);
       navigate("/");
