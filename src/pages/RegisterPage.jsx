@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register as registerApi } from "../api/auth";
-import { useAuth } from "../context/AuthContext";
-import { useCart } from "../context/CartContext";
 import toast from "react-hot-toast";
 
 export default function RegisterPage() {
-  const { login } = useAuth();
-  const { switchToUser } = useCart();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -21,10 +17,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const data = await registerApi(form);
-      login(data.user, data.accessToken, data.refreshToken);
-      switchToUser(data.user.id);
-      toast.success(`Welcome, ${data.user.name}!`);
-      navigate("/");
+      navigate("/verify-otp", { state: { email: data.email } });
     } catch (err) {
       toast.error(err.message);
     } finally {

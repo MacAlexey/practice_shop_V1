@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
   });
 
   const [token, setToken] = useState(
-    () => localStorage.getItem("accessToken") || null,
+    () => localStorage.getItem("accessToken") || null
   );
 
   function login(userData, accessToken, refreshToken) {

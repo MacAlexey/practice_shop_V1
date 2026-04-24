@@ -8,6 +8,7 @@ import RegisterPage from "../pages/RegisterPage";
 import ProfilePage from "../pages/ProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ProtectedRoute from "../components/ProtectedRoute";
+import VerifyOtpPage from "../pages/VerifyOtpPage";
 
 export default function AppRoutes() {
   return (
@@ -21,6 +22,7 @@ export default function AppRoutes() {
       {/* Auth */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/verify-otp" element={<VerifyOtpPage />} />
 
       {/* Protected */}
       <Route element={<ProtectedRoute />}>

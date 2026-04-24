@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 export default function LoginPage() {
   const { login } = useAuth();
   const { switchToUser } = useCart();
+
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -26,7 +27,11 @@ export default function LoginPage() {
       toast.success(`Welcome back, ${data.user.name}!`);
       navigate("/");
     } catch (err) {
-      toast.error(err.message);
+      if (err.email) {
+        navigate("/verify-otp", { state: { email: err.email } });
+      } else {
+        toast.error(err.message);
+      }
     } finally {
       setLoading(false);
     }

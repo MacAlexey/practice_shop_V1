@@ -11,7 +11,7 @@ export default function ProductList({ products = [] }) {
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
   const currentItems = products.slice(
     (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
   );
 
   useEffect(() => {

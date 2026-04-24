@@ -44,7 +44,7 @@ export function CartProvider({ children }) {
 
       if (userId) {
         const guestCart = JSON.parse(
-          localStorage.getItem("cart_guest") || "[]",
+          localStorage.getItem("cart_guest") || "[]"
         );
         const merged = [...userCart];
 
@@ -70,7 +70,7 @@ export function CartProvider({ children }) {
         return prev.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
-            : item,
+            : item
         );
       }
       return [...prev, { ...product, quantity: 1 }];
@@ -89,9 +89,9 @@ export function CartProvider({ children }) {
         .map((item) =>
           item.id === productId
             ? { ...item, quantity: item.quantity + delta }
-            : item,
+            : item
         )
-        .filter((item) => item.quantity > 0),
+        .filter((item) => item.quantity > 0)
     );
   }
 
@@ -101,7 +101,7 @@ export function CartProvider({ children }) {
 
   const totalPrice = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0,
+    0
   );
 
   return (
