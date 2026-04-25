@@ -19,3 +19,7 @@
 Triggers: "проверь", "проверяй", "check", "чекни", "ghjdthm"
 - Immediately read the file, no confirmation needed
 - Do not fix anything, just read and report back
+
+## "читай" command
+Triggers: "читай", "прочитай"
+- Immediately read the file, no confirmation needed
