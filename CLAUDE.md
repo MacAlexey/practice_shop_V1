@@ -23,3 +23,7 @@ Triggers: "проверь", "проверяй", "check", "чекни", "ghjdthm"
 ## "читай" command
 Triggers: "читай", "прочитай"
 - Immediately read the file, no confirmation needed
+
+## "некст" command
+Triggers: "некст", "next", "дальше", "lfkmit", "ytrcn"
+- Continue to the next step without asking for confirmation
