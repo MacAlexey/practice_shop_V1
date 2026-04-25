@@ -26,6 +26,9 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 - Toast notifications
 - Swagger UI at `/api-docs`
 - 404 page
+- File upload API (images converted to .webp, videos get a first-frame thumbnail)
+- Products CRUD API (name, code, medias, price, amount)
+- All non-auth endpoints require a valid access token
 
 ## Project Structure
 
@@ -71,6 +74,8 @@ server/
 ├── routes/
 │   ├── auth.js            # Auth endpoints
 │   ├── orders.js          # Orders endpoints
+│   ├── products.js        # Products CRUD endpoints
+│   ├── upload.js          # File upload endpoint
 │   └── users.js           # Users endpoints
 ├── utils/
 │   └── tokens.js          # generateTokens helper
@@ -109,5 +114,13 @@ npm run dev
 | GET | /api/orders | Get user orders |
 | POST | /api/orders | Create order |
 | GET | /api/orders/:id | Get order by ID |
+| POST | /api/upload | Upload image or video file |
+| GET | /api/products | Get all products |
+| POST | /api/products | Create product |
+| GET | /api/products/:id | Get product by ID |
+| PUT | /api/products/:id | Update product |
+| DELETE | /api/products/:id | Delete product |
+| GET | /api/users | Get all users (dev only) |
 
 > **Note:** Backend uses in-memory storage — data resets on server restart.
+> All endpoints except `/api/auth/*` require a valid access token.
