@@ -16,6 +16,6 @@
 - Show the user what to write and where (file path + line number), let them write it themselves
 
 ## "проверь" command
-Triggers: "проверь", "проверяй", "check", "ghjdthm"
+Triggers: "проверь", "проверяй", "check", "чекни", "ghjdthm"
 - Immediately read the file, no confirmation needed
 - Do not fix anything, just read and report back
