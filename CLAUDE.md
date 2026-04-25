@@ -13,7 +13,8 @@
 
 ## Writing code
 - Do not write code directly into files
-- Show the user what to write and where (file path + line number), let them write it themselves
+- Do not show code suggestions unless the user explicitly asks
+- When asked, show what to write and where (file path + line number), let them write it themselves
 
 ## "проверь" command
 Triggers: "проверь", "проверяй", "check", "чекни", "ghjdthm"
