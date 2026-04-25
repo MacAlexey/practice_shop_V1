@@ -6,4 +6,6 @@ export const db = {
   nextOrderId: 1,
   refreshTokens: new Set(),
   otps: new Map(),
+  products: [],
+  nextProductId: 1,
 };
