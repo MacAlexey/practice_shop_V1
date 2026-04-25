@@ -36,3 +36,24 @@ export function verifyOtp(data) {
     body: JSON.stringify(data),
   });
 }
+
+export function forgot(data) {
+  return request("/auth/forgot", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function verifyOtpForgot(data) {
+  return request("/auth/verify-otp-forgot", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function changePassword(data) {
+  return request("/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}

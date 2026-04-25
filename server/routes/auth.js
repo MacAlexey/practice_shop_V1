@@ -53,14 +53,18 @@ router.post("/login", async (req, res) => {
   }
 
   const user = db.users.find((u) => u.email === email);
-  if (!user) return res.status(400).json({ error: "Invalid email or password" });
+  if (!user)
+    return res.status(400).json({ error: "Invalid email or password" });
 
   const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.status(400).json({ error: "Invalid email or password" });
+  if (!match)
+    return res.status(400).json({ error: "Invalid email or password" });
 
   if (!user.verified) {
     db.otps.set(user.email, "1234");
-    return res.status(403).json({ error: "Account not verified", email: user.email });
+    return res
+      .status(403)
+      .json({ error: "Account not verified", email: user.email });
   }
 
   const { accessToken, refreshToken } = generateTokens(user);
@@ -90,7 +94,9 @@ router.post("/refresh", (req, res) => {
     res.json({ accessToken });
   } catch {
     db.refreshTokens.delete(refreshToken);
-    res.status(401).json({ error: "Refresh token expired, please login again" });
+    res
+      .status(401)
+      .json({ error: "Refresh token expired, please login again" });
   }
 });
 
@@ -142,6 +148,63 @@ router.post("/verify-otp", (req, res) => {
  */
 router.get("/me", requireAuth, (req, res) => {
   res.json(req.user);
+});
+
+/**
+ * POST /api/auth/forgot
+ * Saves a password-reset OTP for the given email.
+ */
+router.post("/forgot", (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "Email is required" });
+
+  const user = db.users.find((u) => u.email === email);
+  if (!user) return res.status(404).json({ error: "found" });
+
+  db.otps.set(`forgot:${email}`, "1234");
+  res.json({ message: "OTP sent", email });
+});
+
+/**
+ * POST /api/auth/verify-otp-forgot
+ * Verifies OTP and returns a short-lived resetToken for changing password.
+ */
+router.post("/verify-otp-forgot", (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp)
+    return res.status(400).json({ error: "Email and OTP are required" });
+
+  const savedOtp = db.otps.get(`forgot:${email}`);
+  if (!savedOtp || savedOtp !== otp)
+    return res.status(400).json({ error: "Invalid OTP" });
+
+  db.otps.delete(`forgot:${email}`);
+  const resetToken = `reset:${email}:${Date.now()}`;
+  db.otps.set(resetToken, email);
+  res.json({ resetToken });
+});
+
+/**
+ * POST /api/auth/change-password
+ * Changes the user password using a valid resetToken.
+ */
+router.post("/change-password", async (req, res) => {
+  const { resetToken, password } = req.body;
+  if (!resetToken || !password)
+    return res
+      .status(400)
+      .json({ error: "Reset token and password are required" });
+
+  const email = db.otps.get(resetToken);
+  if (!email)
+    return res.status(400).json({ error: "Invalid or expired reset token" });
+
+  const user = db.users.find((u) => u.email === email);
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  user.password = await bcrypt.hash(password, 10);
+  db.otps.delete(resetToken);
+  res.json({ message: "Password changed successfully" });
 });
 
 export default router;
