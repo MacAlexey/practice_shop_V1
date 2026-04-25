@@ -6,6 +6,7 @@
 ## README
 - Update README only when something significant changes
 - Always ask the user for confirmation before updating README
+- Update README before pushing, not after
 
 ## Code comments
 - All function comments and JSDoc must be written in English
