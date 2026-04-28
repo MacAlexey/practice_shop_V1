@@ -159,7 +159,7 @@ router.post("/forgot", (req, res) => {
   if (!email) return res.status(400).json({ error: "Email is required" });
 
   const user = db.users.find((u) => u.email === email);
-  if (!user) return res.status(404).json({ error: "found" });
+  if (!user) return res.status(404).json({ error: "User not found" });
 
   db.otps.set(`forgot:${email}`, "1234");
   res.json({ message: "OTP sent", email });

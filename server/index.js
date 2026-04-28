@@ -8,6 +8,7 @@ import ordersRouter from "./routes/orders.js";
 import usersRouter from "./routes/users.js";
 import uploadRouter from "./routes/upload.js";
 import productsRouter from "./routes/products.js";
+import cartsRouter from "./routes/carts.js";
 
 const require = createRequire(import.meta.url);
 const swaggerDocument = require("./swagger.json");
@@ -24,6 +25,7 @@ app.use("/api/users", usersRouter);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/upload", uploadRouter);
 app.use("/api/products", productsRouter);
+app.use("/api/cart", cartsRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running: http://localhost:${PORT}`);

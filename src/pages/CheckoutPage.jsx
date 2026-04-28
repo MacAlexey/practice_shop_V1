@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { createOrder } from "../api/orders";
+import { getProducts } from "../api/products";
+import { formatPrice } from "../utils/format";
 
 export default function CheckoutPage() {
   const { cart, totalPrice, clearCart } = useCart();
@@ -11,6 +13,24 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({ name: "", email: "", address: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [priceChanges, setPriceChanges] = useState([]);
+
+  useEffect(() => {
+    getProducts()
+      .then((products) => {
+        const changes = cart
+          .filter((item) => {
+            const current = products.find((p) => p.id === item.productId);
+            return current && current.price !== item.priceSnapshot;
+          })
+          .map((item) => {
+            const current = products.find((p) => p.id === item.productId);
+            return { name: item.name, old: item.priceSnapshot, new: current.price };
+          });
+        setPriceChanges(changes);
+      })
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -48,19 +68,30 @@ export default function CheckoutPage() {
         <h2 className="font-semibold mb-3">Order Summary</h2>
         <ul className="divide-y text-sm">
           {cart.map((item) => (
-            <li key={item.id} className="py-2 flex justify-between">
+            <li key={item.productId} className="py-2 flex justify-between">
               <span>
                 {item.image} {item.name} × {item.quantity}
               </span>
-              <span>{(item.price * item.quantity).toLocaleString()} VND</span>
+              <span>{formatPrice(item.priceSnapshot * item.quantity)}</span>
             </li>
           ))}
         </ul>
         <div className="mt-3 pt-3 border-t font-bold flex justify-between">
           <span>Total</span>
-          <span>{totalPrice.toLocaleString()} VND</span>
+          <span>{formatPrice(totalPrice)}</span>
         </div>
       </div>
+
+      {priceChanges.length > 0 && (
+        <div className="mb-4 bg-orange-50 text-orange-700 px-4 py-3 rounded-lg text-sm">
+          <p className="font-semibold mb-1">Price changed since you added to cart:</p>
+          {priceChanges.map((c) => (
+            <p key={c.name}>
+              {c.name}: {formatPrice(c.old)} → {formatPrice(c.new)}
+            </p>
+          ))}
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm">

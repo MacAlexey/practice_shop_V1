@@ -8,7 +8,7 @@ const router = Router();
  * GET /api/products
  * Returns all products.
  */
-router.get("/", requireAuth, (req, res) => {
+router.get("/", (req, res) => {
   res.json(db.products);
 });
 
@@ -16,7 +16,7 @@ router.get("/", requireAuth, (req, res) => {
  * GET /api/products/:id
  * Returns a single product by ID.
  */
-router.get("/:id", requireAuth, (req, res) => {
+router.get("/:id", (req, res) => {
   const product = db.products.find((p) => p.id === Number(req.params.id));
   if (!product) return res.status(404).json({ error: "Product not found" });
   res.json(product);

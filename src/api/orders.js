@@ -1,12 +1,12 @@
-import { request } from './client'
+import { request } from "./client";
 
 export function getOrders() {
-  return request('/orders')
+  return request("/orders");
 }
 
 export function createOrder(orderData) {
-  return request('/orders', {
-    method: 'POST',
+  return request("/orders", {
+    method: "POST",
     body: JSON.stringify(orderData),
-  })
+  });
 }

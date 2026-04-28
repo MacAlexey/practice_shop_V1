@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { formatPrice } from "../utils/format";
 
 export default function CartDropdown({ onClose }) {
   const { cart, totalPrice, changeQuantity, removeFromCart } = useCart();
@@ -15,33 +16,29 @@ export default function CartDropdown({ onClose }) {
           <>
             <ul className="divide-y max-h-64 overflow-y-auto">
               {cart.map((item) => (
-                <li key={item.id} className="py-2 flex items-center gap-2">
+                <li key={item.productId} className="py-2 flex items-center gap-2">
                   <span>{item.image}</span>
                   <div className="flex-1">
                     <p className="text-sm font-medium">{item.name}</p>
-                    <p className="text-xs text-gray-400">
-                      {item.price.toLocaleString()} VND
-                    </p>
+                    <p className="text-xs text-gray-400">{formatPrice(item.priceSnapshot)}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => changeQuantity(item.id, -1)}
+                      onClick={() => changeQuantity(item.productId, -1)}
                       className="w-6 h-6 bg-gray-100 rounded-full text-sm"
                     >
                       −
                     </button>
-                    <span className="text-sm w-4 text-center">
-                      {item.quantity}
-                    </span>
+                    <span className="text-sm w-4 text-center">{item.quantity}</span>
                     <button
-                      onClick={() => changeQuantity(item.id, 1)}
+                      onClick={() => changeQuantity(item.productId, 1)}
                       className="w-6 h-6 bg-gray-100 rounded-full text-sm"
                     >
                       +
                     </button>
                   </div>
                   <button
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(item.productId)}
                     className="text-red-400 hover:text-red-600 text-sm"
                   >
                     ✕
@@ -51,9 +48,7 @@ export default function CartDropdown({ onClose }) {
             </ul>
 
             <div className="mt-3 pt-3 border-t flex justify-between items-center">
-              <span className="font-bold">
-                Total: {totalPrice.toLocaleString()} VND
-              </span>
+              <span className="font-bold">Total: {formatPrice(totalPrice)}</span>
             </div>
 
             <div className="mt-3 flex flex-col gap-2">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import Pagination from "./Pagination";
+import { formatPrice } from "../utils/format";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -27,17 +28,32 @@ export default function ProductList({ products = [] }) {
             key={product.id}
             className="bg-white rounded-xl shadow p-4 flex flex-col items-center gap-3"
           >
-            <span className="text-5xl">{product.image}</span>
+            <span className="text-5xl">{product.medias?.[0]}</span>
             <h3 className="font-semibold text-lg">{product.name}</h3>
-            <p className="text-gray-500">
-              {product.price.toLocaleString()} VND
-            </p>
-            <button
-              onClick={() => addToCart(product)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition"
-            >
-              Add to Cart
-            </button>
+            <p className="text-gray-500">{formatPrice(product.price)}</p>
+            {product.amount === 0 ? (
+              <>
+                <p className="text-xs h-4" />
+                <button
+                  disabled
+                  className="w-full bg-gray-200 text-gray-400 py-2 rounded-lg cursor-not-allowed"
+                >
+                  Out of Stock
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-orange-500 h-4">
+                  {product.amount <= 5 ? `Only ${product.amount} left` : ""}
+                </p>
+                <button
+                  onClick={() => addToCart(product)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition"
+                >
+                  Add to Cart
+                </button>
+              </>
+            )}
           </div>
         ))}
       </div>

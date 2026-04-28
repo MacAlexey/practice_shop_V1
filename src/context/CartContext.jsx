@@ -1,11 +1,30 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import {
+  getCart,
+  addToCart as apiAddToCart,
+  updateCartItem,
+  removeCartItem,
+  clearCart as apiClearCart,
+} from "../api/cart.js";
 
 const CartContext = createContext();
 
-/**
- * Returns cart_guest key for guests or cart_{id} key
- * for logged-in users */
+/** 
+Reads cart items from localStorage by the given key. 
+ */
+function getLocalCart(key) {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+/** 
+ Checks if a user is logged in 
+ Returns cart_{userId} for logged-in users and cart_guest for guests.
+ */
 function getInitialKey() {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -17,90 +36,131 @@ function getInitialKey() {
 
 export function CartProvider({ children }) {
   const [cartKey, setCartKey] = useState(getInitialKey);
-
-  const [cart, setCart] = useState(() => {
-    try {
-      const saved = localStorage.getItem(getInitialKey());
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [cart, setCart] = useState(() => getLocalCart(getInitialKey()));
+  const isGuest = cartKey === "cart_guest";
 
   useEffect(() => {
     localStorage.setItem(cartKey, JSON.stringify(cart));
   }, [cart, cartKey]);
 
-  /**
-   * Switches cart on login/logout.
-   * On login: merges guest cart into user cart without overwriting existing items.
-   * On logout: loads guest cart.
-   */
+  useEffect(() => {
+    if (!isGuest) {
+      getCart()
+        .then((serverCart) => setCart(serverCart.items))
+        .catch(() => {});
+    }
+  }, []);
+
   function switchToUser(userId) {
-    const key = userId ? `cart_${userId}` : "cart_guest";
-    setCartKey(key);
-    try {
-      const userCart = JSON.parse(localStorage.getItem(key) || "[]");
+    if (userId) {
+      const key = `cart_${userId}`;
+      setCartKey(key);
+      const guestCart = getLocalCart("cart_guest");
 
-      if (userId) {
-        const guestCart = JSON.parse(
-          localStorage.getItem("cart_guest") || "[]"
-        );
-        const merged = [...userCart];
+      getCart()
+        .then((serverCart) => {
+          const mergePromises = guestCart.map((g) =>
+            apiAddToCart(g.productId, g.quantity).catch(() => {})
+          );
 
-        guestCart.forEach((guestItem) => {
-          const exists = merged.find((item) => item.id === guestItem.id);
-          if (!exists) merged.push(guestItem);
-        });
-
-        localStorage.removeItem("cart_guest");
-        setCart(merged);
-      } else {
-        setCart(userCart);
-      }
-    } catch {
-      setCart([]);
+          return Promise.all(mergePromises).then(() => getCart());
+        })
+        .then((updatedCart) => {
+          setCart(updatedCart.items);
+          localStorage.removeItem("cart_guest");
+        })
+        .catch(() => setCart([]));
+    } else {
+      setCartKey("cart_guest");
+      setCart(getLocalCart("cart_guest"));
     }
   }
 
   function addToCart(product) {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-    toast.success(`${product.name} added to cart`);
+    const prev = cart;
+    const existing = cart.find((item) => item.productId === product.id);
+
+    if (existing) {
+      setCart([
+        { ...existing, quantity: existing.quantity + 1 },
+        ...cart.filter((item) => item.productId !== product.id),
+      ]);
+    } else {
+      setCart([
+        {
+          productId: product.id,
+          name: product.name,
+          code: product.code,
+          image: product.medias?.[0] ?? product.image ?? null,
+          priceSnapshot: product.price,
+          quantity: 1,
+        },
+        ...cart,
+      ]);
+    }
+
+    toast.success(`${product.name} added to cart`, { id: "cart-toast" });
+
+    if (!isGuest) {
+      apiAddToCart(product.id, 1)
+        .then((serverCart) => setCart(serverCart.items))
+        .catch((err) => {
+          setCart(prev);
+          toast.error(err.message || "Failed to add item", { id: "cart-toast" });
+        });
+    }
   }
 
   function removeFromCart(productId) {
-    setCart((prev) => prev.filter((item) => item.id !== productId));
-    toast.error("Item removed from cart");
+    const prev = cart;
+    setCart(cart.filter((item) => item.productId !== productId));
+    toast.error("Item removed from cart", { id: "cart-toast" });
+
+    if (!isGuest) {
+      removeCartItem(productId)
+        .then((serverCart) => setCart(serverCart.items))
+        .catch(() => setCart(prev));
+    }
   }
 
   function changeQuantity(productId, delta) {
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.id === productId
-            ? { ...item, quantity: item.quantity + delta }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
+    const prev = cart;
+    const item = cart.find((i) => i.productId === productId);
+    if (!item) return;
+
+    const newQty = item.quantity + delta;
+    if (newQty <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+
+    setCart(
+      cart.map((i) =>
+        i.productId === productId ? { ...i, quantity: newQty } : i
+      )
     );
+
+    if (!isGuest) {
+      updateCartItem(productId, newQty)
+        .then((serverCart) => setCart(serverCart.items))
+        .catch((err) => {
+          setCart(prev);
+          toast.error(err.message || "Failed to update quantity", { id: "cart-toast" });
+        });
+    }
   }
 
   function clearCart() {
+    const prev = cart;
     setCart([]);
+
+    if (!isGuest) {
+      apiClearCart().catch(() => setCart(prev));
+    }
   }
 
   const totalPrice = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + (item.priceSnapshot ?? item.price) * item.quantity,
     0
   );
 

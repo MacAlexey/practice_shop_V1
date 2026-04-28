@@ -13,22 +13,28 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 
 - Product catalog with search and sort
 - Pagination
-- Cart with quantity management (per-user, persisted in localStorage)
+- "Out of stock" button when product amount is 0
+- "Only N left" warning when stock is low (≤ 5)
+- Server-side cart with optimistic updates
+- Cart stored in localStorage for guests, synced to server for logged-in users
+- Guest cart merges into server cart on login
+- New items added to top of cart
 - Cart dropdown in navbar
-- Guest cart merges into user cart on login (without overwriting existing items)
 - Checkout for both guests and logged-in users
+- Price snapshot — warns if price changed since item was added to cart
 - Orders history page
 - User authentication (register / login / logout)
 - OTP account verification on registration (default: `1234`)
 - Forgot password flow: email → OTP → new password
 - Refresh token — auto re-issue access token on expiry
 - Protected routes (redirect to login if not authenticated)
-- Toast notifications
+- Toast notifications (max 1 at a time)
 - Swagger UI at `/api-docs`
 - 404 page
 - File upload API (images converted to .webp, videos get a first-frame thumbnail)
 - Products CRUD API (name, code, medias, price, amount)
-- All non-auth endpoints require a valid access token
+- Product catalog is public (no auth required)
+- All other non-auth endpoints require a valid access token
 
 ## Project Structure
 
@@ -36,9 +42,12 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 src/
 ├── api/
 │   ├── auth.js            # Auth API calls
+│   ├── cart.js            # Cart API calls
 │   ├── client.js          # Base HTTP client with auto token refresh
-│   └── orders.js          # Orders API calls
+│   ├── orders.js          # Orders API calls
+│   └── products.js        # Products API calls
 ├── components/
+│   ├── Cart.jsx           # Cart item list
 │   ├── CartDropdown.jsx   # Navbar cart dropdown
 │   ├── Navbar.jsx         # Navigation bar
 │   ├── Pagination.jsx     # Pagination controls
@@ -47,7 +56,7 @@ src/
 │   └── SearchBar.jsx      # Search and sort controls
 ├── context/
 │   ├── AuthContext.jsx    # Global auth state
-│   └── CartContext.jsx    # Global cart state
+│   └── CartContext.jsx    # Global cart state with optimistic updates
 ├── hooks/
 │   └── useProductFilter.js # Custom hook for search/sort/filter
 ├── pages/
@@ -61,18 +70,21 @@ src/
 │   ├── ProfilePage.jsx
 │   ├── RegisterPage.jsx
 │   ├── ShopPage.jsx
-│   └── VerifyOtpPage.jsx
+│   ├── VerifyOtpPage.jsx
 │   └── VerifyOtpForgotPage.jsx
 ├── routes/
 │   └── index.jsx          # App routes
+├── utils/
+│   └── format.js          # formatPrice helper
 server/
 ├── index.js               # Express app setup + listen
 ├── config.js              # PORT, JWT secrets
-├── db.js                  # In-memory storage
+├── db.js                  # In-memory storage (seeded from products.js)
 ├── middleware/
 │   └── requireAuth.js     # JWT auth middleware
 ├── routes/
 │   ├── auth.js            # Auth endpoints
+│   ├── carts.js           # Cart endpoints
 │   ├── orders.js          # Orders endpoints
 │   ├── products.js        # Products CRUD endpoints
 │   ├── upload.js          # File upload endpoint
@@ -115,12 +127,17 @@ npm run dev
 | POST | /api/orders | Create order |
 | GET | /api/orders/:id | Get order by ID |
 | POST | /api/upload | Upload image or video file |
-| GET | /api/products | Get all products |
+| GET | /api/products | Get all products (public) |
 | POST | /api/products | Create product |
-| GET | /api/products/:id | Get product by ID |
+| GET | /api/products/:id | Get product by ID (public) |
 | PUT | /api/products/:id | Update product |
 | DELETE | /api/products/:id | Delete product |
+| GET | /api/cart | Get current user's cart |
+| POST | /api/cart/items | Add item to cart |
+| PUT | /api/cart/items/:productId | Update item quantity |
+| DELETE | /api/cart/items/:productId | Remove item from cart |
+| DELETE | /api/cart | Clear cart |
 | GET | /api/users | Get all users (dev only) |
 
 > **Note:** Backend uses in-memory storage — data resets on server restart.
-> All endpoints except `/api/auth/*` require a valid access token.
+> All endpoints except `/api/auth/*`, `GET /api/products`, and `GET /api/products/:id` require a valid access token.

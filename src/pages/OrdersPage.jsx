@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getOrders } from "../api/orders";
 import { useAuth } from "../context/AuthContext";
+import { formatPrice } from "../utils/format";
 
 export default function OrdersPage() {
   const { user } = useAuth();
@@ -10,10 +11,12 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (!user) {
-      const guestOrders = JSON.parse(localStorage.getItem('guestOrders') || '[]')
-      setOrders(guestOrders)
-      setLoading(false)
-      return
+      const guestOrders = JSON.parse(
+        localStorage.getItem("guestOrders") || "[]"
+      );
+      setOrders(guestOrders);
+      setLoading(false);
+      return;
     }
 
     getOrders()
@@ -55,18 +58,18 @@ export default function OrdersPage() {
               <p className="text-sm text-gray-600 mb-3">📍 {order.address}</p>
               <ul className="text-sm divide-y">
                 {order.items.map((item) => (
-                  <li key={item.id} className="py-1 flex justify-between">
+                  <li key={item.productId} className="py-1 flex justify-between">
                     <span>
                       {item.image} {item.name} × {item.quantity}
                     </span>
                     <span className="text-gray-500">
-                      {(item.price * item.quantity).toLocaleString()} VND
+                      {formatPrice((item.priceSnapshot ?? item.price) * item.quantity)}
                     </span>
                   </li>
                 ))}
               </ul>
               <div className="mt-3 pt-3 border-t font-bold text-right">
-                {order.totalPrice.toLocaleString()} VND
+                {formatPrice(order.totalPrice)}
               </div>
             </li>
           ))}
