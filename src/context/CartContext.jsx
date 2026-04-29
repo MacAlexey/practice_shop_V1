@@ -80,6 +80,11 @@ export function CartProvider({ children }) {
     const prev = cart;
     const existing = cart.find((item) => item.productId === product.id);
 
+    if (!existing && cart.length >= 10) {
+      toast.error("Your cart is full", { id: "cart-toast" });
+      return;
+    }
+
     if (existing) {
       setCart([
         { ...existing, quantity: existing.quantity + 1 },

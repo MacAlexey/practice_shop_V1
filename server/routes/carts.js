@@ -68,8 +68,8 @@ router.post("/items", requireAuth, (req, res) => {
       ...cart.items.filter((i) => i.productId !== productId),
     ];
   } else {
-    if (cart.items.length >= 50)
-      return res.status(400).json({ error: "Your сart is full" });
+    if (cart.items.length >= 10)
+      return res.status(400).json({ error: "Your cart is full" });
     if (quantity > product.amount)
       return res.status(400).json({ error: "Not enough stock" });
     cart.items.unshift({
