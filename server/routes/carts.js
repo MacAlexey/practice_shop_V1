@@ -20,7 +20,12 @@ router.get("/", requireAuth, (req, res) => {
     };
     db.carts.push(cart);
   }
-  res.json(cart);
+
+  const itemsWithStatus = cart.items.map((item) => ({
+    ...item,
+    unavailable: !db.products.find((p) => p.id === item.productId),
+  }));
+  res.json({ ...cart, items: itemsWithStatus });
 });
 
 /**

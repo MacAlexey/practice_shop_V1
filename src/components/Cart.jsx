@@ -18,11 +18,14 @@ export default function Cart({ onCheckout }) {
       <h2 className="text-2xl font-bold mb-4">Cart</h2>
       <ul className="divide-y">
         {cart.map((item) => (
-          <li key={item.productId} className="py-3 flex items-center gap-3">
+          <li key={item.productId} className={`py-3 flex items-center gap-3 ${item.unavailable ? "opacity-50" : ""}`}>
             <span className="text-2xl">{item.image}</span>
             <div className="flex-1">
               <p className="font-medium">{item.name}</p>
-              <p className="text-sm text-gray-500">{formatPrice(item.priceSnapshot)}</p>
+              {item.unavailable
+                ? <p className="text-xs text-red-500 font-medium">Unavailable</p>
+                : <p className="text-sm text-gray-500">{formatPrice(item.priceSnapshot)}</p>
+              }
             </div>
             <div className="flex items-center gap-2">
               <button

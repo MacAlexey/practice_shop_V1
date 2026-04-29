@@ -16,11 +16,14 @@ export default function CartDropdown({ onClose }) {
           <>
             <ul className="divide-y max-h-64 overflow-y-auto">
               {cart.map((item) => (
-                <li key={item.productId} className="py-2 flex items-center gap-2">
+                <li key={item.productId} className={`py-2 flex items-center gap-2 ${item.unavailable ? "opacity-50" : ""}`}>
                   <span>{item.image}</span>
                   <div className="flex-1">
                     <p className="text-sm font-medium">{item.name}</p>
-                    <p className="text-xs text-gray-400">{formatPrice(item.priceSnapshot)}</p>
+                    {item.unavailable
+                      ? <p className="text-xs text-red-500 font-medium">Unavailable</p>
+                      : <p className="text-xs text-gray-400">{formatPrice(item.priceSnapshot)}</p>
+                    }
                   </div>
                   <div className="flex items-center gap-1">
                     <button

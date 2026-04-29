@@ -47,7 +47,9 @@ router.post("/", (req, res) => {
   }
 
   if (!userName || !userEmail || !address || !items || items.length === 0) {
-    return res.status(400).json({ error: "Please fill in all fields and add items to cart" });
+    return res
+      .status(400)
+      .json({ error: "Please fill in all fields and add items to cart" });
   }
 
   const order = {
@@ -62,6 +64,11 @@ router.post("/", (req, res) => {
     createdAt: new Date().toISOString(),
   };
 
+  items.forEach((item) => {
+    const product = db.products.find((p) => p.id === item.productId);
+    if (product) product.amount = Math.max(0, product.amount - item.quantity);
+  });
+
   db.orders.push(order);
   res.status(201).json(order);
 });
@@ -73,7 +80,8 @@ router.post("/", (req, res) => {
 router.get("/:id", requireAuth, (req, res) => {
   const order = db.orders.find((o) => o.id === Number(req.params.id));
   if (!order) return res.status(404).json({ error: "Order not found" });
-  if (order.userId !== req.user.id) return res.status(403).json({ error: "Access denied" });
+  if (order.userId !== req.user.id)
+    return res.status(403).json({ error: "Access denied" });
   res.json(order);
 });
 
