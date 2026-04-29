@@ -22,6 +22,8 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 - Cart dropdown in navbar
 - Checkout for both guests and logged-in users
 - Price snapshot — warns if price changed since item was added to cart
+- Unavailable items shown in cart (dimmed with red label if product deleted from catalog)
+- Stock deducted automatically when order is placed
 - Orders history page
 - User authentication (register / login / logout)
 - OTP account verification on registration (default: `1234`)
