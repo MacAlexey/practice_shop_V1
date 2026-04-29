@@ -37,6 +37,8 @@ function getInitialKey() {
 export function CartProvider({ children }) {
   const [cartKey, setCartKey] = useState(getInitialKey);
   const [cart, setCart] = useState(() => getLocalCart(getInitialKey()));
+  const [cartId, setCartId] = useState(null);
+
   const isGuest = cartKey === "cart_guest";
 
   useEffect(() => {
@@ -46,7 +48,10 @@ export function CartProvider({ children }) {
   useEffect(() => {
     if (!isGuest) {
       getCart()
-        .then((serverCart) => setCart(serverCart.items))
+        .then((serverCart) => {
+          setCart(serverCart.items);
+          setCartId(serverCart.id);
+        })
         .catch(() => {});
     }
   }, []);
@@ -67,6 +72,7 @@ export function CartProvider({ children }) {
         })
         .then((updatedCart) => {
           setCart(updatedCart.items);
+          setCartId(updatedCart.id);
           localStorage.removeItem("cart_guest");
         })
         .catch(() => setCart([]));
@@ -111,7 +117,9 @@ export function CartProvider({ children }) {
         .then((serverCart) => setCart(serverCart.items))
         .catch((err) => {
           setCart(prev);
-          toast.error(err.message || "Failed to add item", { id: "cart-toast" });
+          toast.error(err.message || "Failed to add item", {
+            id: "cart-toast",
+          });
         });
     }
   }
@@ -150,7 +158,9 @@ export function CartProvider({ children }) {
         .then((serverCart) => setCart(serverCart.items))
         .catch((err) => {
           setCart(prev);
-          toast.error(err.message || "Failed to update quantity", { id: "cart-toast" });
+          toast.error(err.message || "Failed to update quantity", {
+            id: "cart-toast",
+          });
         });
     }
   }
@@ -173,6 +183,7 @@ export function CartProvider({ children }) {
     <CartContext.Provider
       value={{
         cart,
+        cartId,
         addToCart,
         removeFromCart,
         changeQuantity,

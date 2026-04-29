@@ -7,7 +7,7 @@ import { getProducts } from "../api/products";
 import { formatPrice } from "../utils/format";
 
 export default function CheckoutPage() {
-  const { cart, totalPrice, clearCart } = useCart();
+  const { cart, totalPrice, clearCart, cartId } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", address: "" });
@@ -25,7 +25,11 @@ export default function CheckoutPage() {
           })
           .map((item) => {
             const current = products.find((p) => p.id === item.productId);
-            return { name: item.name, old: item.priceSnapshot, new: current.price };
+            return {
+              name: item.name,
+              old: item.priceSnapshot,
+              new: current.price,
+            };
           });
         setPriceChanges(changes);
       })
@@ -44,6 +48,7 @@ export default function CheckoutPage() {
         address: form.address,
         items: cart,
         totalPrice,
+        cartId,
       });
 
       if (!user) {
@@ -84,7 +89,9 @@ export default function CheckoutPage() {
 
       {priceChanges.length > 0 && (
         <div className="mb-4 bg-orange-50 text-orange-700 px-4 py-3 rounded-lg text-sm">
-          <p className="font-semibold mb-1">Price changed since you added to cart:</p>
+          <p className="font-semibold mb-1">
+            Price changed since you added to cart:
+          </p>
           {priceChanges.map((c) => (
             <p key={c.name}>
               {c.name}: {formatPrice(c.old)} → {formatPrice(c.new)}

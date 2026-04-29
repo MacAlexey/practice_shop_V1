@@ -29,7 +29,7 @@ router.get("/", (req, res) => {
  * Creates a new order. Works for both authenticated users and guests.
  */
 router.post("/", (req, res) => {
-  const { name, email, address, items, totalPrice } = req.body;
+  const { name, email, address, items, totalPrice, cartId } = req.body;
 
   const header = req.headers.authorization;
   let userId = null;
@@ -55,6 +55,7 @@ router.post("/", (req, res) => {
   const order = {
     id: db.nextOrderId++,
     userId,
+    cartId: cartId || null,
     name: userName,
     email: userEmail,
     address,

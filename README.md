@@ -24,6 +24,8 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 - Price snapshot — warns if price changed since item was added to cart
 - Unavailable items shown in cart (dimmed with red label if product deleted from catalog)
 - Stock deducted automatically when order is placed
+- Cart limited to 10 unique items (enforced on both client and server)
+- Order stores cartId — relation between order and the cart it was created from
 - Orders history page
 - User authentication (register / login / logout)
 - OTP account verification on registration (default: `1234`)
