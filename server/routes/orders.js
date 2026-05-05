@@ -62,6 +62,9 @@ router.post("/", (req, res) => {
     items,
     totalPrice,
     status: "Pending",
+    paymentStatus: "unpaid",
+    paidAt: null,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     createdAt: new Date().toISOString(),
   };
 

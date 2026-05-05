@@ -4,11 +4,13 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { createOrder } from "../api/orders";
 import { getProducts } from "../api/products";
+import { createPaymentSession } from "../api/payments";
 import { formatPrice } from "../utils/format";
 
 export default function CheckoutPage() {
   const { cart, totalPrice, clearCart, cartId } = useCart();
   const { user } = useAuth();
+  const [payMode, setPayMode] = useState("now");
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", address: "" });
   const [loading, setLoading] = useState(false);
@@ -56,8 +58,13 @@ export default function CheckoutPage() {
         localStorage.setItem("guestOrders", JSON.stringify([...saved, order]));
       }
 
-      clearCart();
-      navigate("/orders");
+      if (payMode === "now") {
+        const { url } = await createPaymentSession(order.id);
+        window.location.href = url;
+      } else {
+        clearCart();
+        navigate("/orders");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -176,10 +183,19 @@ export default function CheckoutPage() {
           </button>
           <button
             type="submit"
+            onClick={() => setPayMode("now")}
+            disabled={loading || cart.length === 0}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-2 rounded-lg transition"
+          >
+            {loading && payMode === "now" ? "Redirecting..." : "Pay Now"}
+          </button>
+          <button
+            type="submit"
+            onClick={() => setPayMode("later")}
             disabled={loading || cart.length === 0}
             className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white py-2 rounded-lg transition"
           >
-            {loading ? "Placing..." : "Place Order"}
+            {loading && payMode === "later" ? "Placing..." : "Pay Later"}
           </button>
         </div>
       </form>

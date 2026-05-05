@@ -8,6 +8,8 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 - **Backend:** Node.js, Express
 - **Routing:** React Router DOM
 - **Auth:** JWT (accessToken 15m + refreshToken 7d) + bcrypt
+- **Payments:** Stripe Checkout (sandbox)
+- **Real-time:** Socket.io (WebSocket)
 
 ## Features
 
@@ -26,6 +28,8 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 - Stock deducted automatically when order is placed
 - Cart limited to 10 unique items (enforced on both client and server)
 - Order stores cartId — relation between order and the cart it was created from
+- Stripe payment integration — Pay Now (redirect to Stripe) or Pay Later (within 7 days)
+- Real-time order status update via WebSocket — status changes to Paid instantly after Stripe webhook
 - Orders history page
 - User authentication (register / login / logout)
 - OTP account verification on registration (default: `1234`)
@@ -49,6 +53,7 @@ src/
 │   ├── cart.js            # Cart API calls
 │   ├── client.js          # Base HTTP client with auto token refresh
 │   ├── orders.js          # Orders API calls
+│   ├── payments.js        # Payments API calls
 │   └── products.js        # Products API calls
 ├── components/
 │   ├── Cart.jsx           # Cart item list
@@ -82,16 +87,18 @@ src/
 │   └── format.js          # formatPrice helper
 server/
 ├── index.js               # Express app setup + listen
-├── config.js              # PORT, JWT secrets
+├── config.js              # PORT, JWT secrets, Stripe keys
 ├── db.js                  # In-memory storage (seeded from products.js)
+├── socket.js              # Socket.io initialization
 ├── middleware/
 │   └── requireAuth.js     # JWT auth middleware
 ├── routes/
 │   ├── auth.js            # Auth endpoints
 │   ├── carts.js           # Cart endpoints
+│   ├── media.js           # File upload endpoint
 │   ├── orders.js          # Orders endpoints
+│   ├── payments.js        # Stripe payment endpoints
 │   ├── products.js        # Products CRUD endpoints
-│   ├── upload.js          # File upload endpoint
 │   └── users.js           # Users endpoints
 ├── utils/
 │   └── tokens.js          # generateTokens helper
@@ -131,6 +138,8 @@ npm run dev
 | POST | /api/orders | Create order |
 | GET | /api/orders/:id | Get order by ID |
 | POST | /api/upload | Upload image or video file |
+| POST | /api/payments/create-session | Create Stripe Checkout session |
+| POST | /api/payments/webhook | Receive Stripe webhook events |
 | GET | /api/products | Get all products (public) |
 | POST | /api/products | Create product |
 | GET | /api/products/:id | Get product by ID (public) |
@@ -145,3 +154,4 @@ npm run dev
 
 > **Note:** Backend uses in-memory storage — data resets on server restart.
 > All endpoints except `/api/auth/*`, `GET /api/products`, and `GET /api/products/:id` require a valid access token.
+> For Stripe webhooks to work locally, run `ngrok http 3001` and add the public URL as a webhook endpoint in the Stripe dashboard.
