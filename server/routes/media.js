@@ -39,48 +39,52 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ storage, fileFilter });
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 50 * 1024 * 1024 },
+});
 
 /**
  * POST /api/upload
  * Uploads a file. Images are converted to .webp, videos get a thumbnail from the first frame.
  */
-router.post("/", requireAuth, upload.single("file"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
+router.post("/", requireAuth, upload.array("file", 10), async (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: "No files uploaded" });
   }
 
-  const isImage = req.file.mimetype.startsWith("image/");
-  const isVideo = req.file.mimetype.startsWith("video/");
+  const results = await Promise.all(
+    req.files.map(async (file) => {
+      const isImage = file.mimetype.startsWith("image/");
+      const isVideo = file.mimetype.startsWith("video/");
 
-  if (isImage) {
-    const webpPath = req.file.path.replace(
-      path.extname(req.file.path),
-      ".webp"
-    );
-    await sharp(req.file.path).webp().toFile(webpPath);
-    fs.unlinkSync(req.file.path);
-    return res.json({ url: `/${webpPath}` });
-  }
+      if (isImage) {
+        const webpPath = file.path.replace(path.extname(file.path), ".webp");
+        await sharp(file.path).webp().toFile(webpPath);
+        fs.unlinkSync(file.path);
+        return { url: `/${webpPath}` };
+      }
 
-  if (isVideo) {
-    const thumbPath = req.file.path.replace(
-      path.extname(req.file.path),
-      "-thumb.webp"
-    );
-    await new Promise((resolve, reject) => {
-      ffmpeg(req.file.path)
-        .screenshots({
-          timestamps: ["00:00:00"],
-          filename: path.basename(thumbPath),
-          folder: path.dirname(thumbPath),
-          size: "320x?",
-        })
-        .on("end", resolve)
-        .on("error", reject);
-    });
-    return res.json({ url: `/${req.file.path}`, thumb: `/${thumbPath}` });
-  }
+      if (isVideo) {
+        const thumbPath = file.path.replace(path.extname(file.path), "-thumb.webp");
+        await new Promise((resolve, reject) => {
+          ffmpeg(file.path)
+            .screenshots({
+              timestamps: ["00:00:00"],
+              filename: path.basename(thumbPath),
+              folder: path.dirname(thumbPath),
+              size: "320x?",
+            })
+            .on("end", resolve)
+            .on("error", reject);
+        });
+        return { url: `/${file.path}`, thumb: `/${thumbPath}` };
+      }
+    })
+  );
+
+  res.json(results);
 });
 
 export default router;

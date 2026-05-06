@@ -28,8 +28,9 @@ export async function request(endpoint, options = {}) {
       });
 
       if (refreshRes.ok) {
-        const { accessToken } = await refreshRes.json();
+        const { accessToken, refreshToken: newRefreshToken } = await refreshRes.json();
         localStorage.setItem("accessToken", accessToken);
+        if (newRefreshToken) localStorage.setItem("refreshToken", newRefreshToken);
         res = await doRequest(endpoint, options);
       }
     }

@@ -30,7 +30,7 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 - Price snapshot with warning if price changed since item was added
 - Server-side price recalculation — client value is ignored
 - Stock validation before order creation
-- Pay Now (Stripe redirect) or Pay Later (7-day window)
+- Pay Now (Stripe redirect) or Pay Later within 7 days — authenticated users only
 - Real-time order status update via WebSocket after payment
 - Orders history page
 

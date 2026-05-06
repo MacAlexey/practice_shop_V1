@@ -38,7 +38,9 @@ export default function CheckoutPage() {
 
         const recalculated = cart.reduce((sum, item) => {
           const current = products.find((p) => p.id === item.productId);
-          return sum + (current ? current.price : item.priceSnapshot) * item.quantity;
+          return (
+            sum + (current ? current.price : item.priceSnapshot) * item.quantity
+          );
         }, 0);
         if (recalculated !== totalPrice) setActualTotal(recalculated);
       })
@@ -49,6 +51,12 @@ export default function CheckoutPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    if (!user && payMode === "now") {
+      setError("Please log in to pay now.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const order = await createOrder({
@@ -100,9 +108,13 @@ export default function CheckoutPage() {
           <div className="text-right">
             {actualTotal ? (
               <>
-                <p className="line-through text-gray-400 text-sm font-normal">{formatPrice(totalPrice)}</p>
+                <p className="line-through text-gray-400 text-sm font-normal">
+                  {formatPrice(totalPrice)}
+                </p>
                 <p>{formatPrice(actualTotal)}</p>
-                <p className="text-xs text-orange-500 font-normal">Recalculated at current prices</p>
+                <p className="text-xs text-orange-500 font-normal">
+                  Recalculated at current prices
+                </p>
               </>
             ) : (
               <span>{formatPrice(totalPrice)}</span>
@@ -206,14 +218,16 @@ export default function CheckoutPage() {
           >
             {loading && payMode === "now" ? "Redirecting..." : "Pay Now"}
           </button>
-          <button
-            type="submit"
-            onClick={() => setPayMode("later")}
-            disabled={loading || cart.length === 0}
-            className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white py-2 rounded-lg transition"
-          >
-            {loading && payMode === "later" ? "Placing..." : "Pay Later"}
-          </button>
+          {user && (
+            <button
+              type="submit"
+              onClick={() => setPayMode("later")}
+              disabled={loading || cart.length === 0}
+              className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white py-2 rounded-lg transition"
+            >
+              {loading && payMode === "later" ? "Placing..." : "Pay Later"}
+            </button>
+          )}
         </div>
       </form>
     </div>

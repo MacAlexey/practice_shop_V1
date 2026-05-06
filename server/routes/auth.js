@@ -90,8 +90,10 @@ router.post("/refresh", (req, res) => {
 
   try {
     const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
-    const { accessToken } = generateTokens(decoded);
-    res.json({ accessToken });
+    const tokens = generateTokens(decoded);
+    db.refreshTokens.delete(refreshToken);
+    db.refreshTokens.add(tokens.refreshToken);
+    res.json({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
   } catch {
     db.refreshTokens.delete(refreshToken);
     res
