@@ -40,14 +40,16 @@ export default function OrdersPage() {
   }, []);
 
   useEffect(() => {
+    if (!user) return;
     const socket = io("http://localhost:3001");
+    socket.emit("join", user.id);
     socket.on("order:paid", ({ orderId }) => {
       setOrders((prev) =>
         prev.map((o) => o.id === orderId ? { ...o, paymentStatus: "paid" } : o)
       );
     });
     return () => socket.disconnect();
-  }, []);
+  }, [user]);
 
   async function handlePayNow(orderId) {
     try {

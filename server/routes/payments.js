@@ -72,7 +72,7 @@ router.post("/webhook", (req, res) => {
     if (order) {
       order.paymentStatus = "paid";
       order.paidAt = new Date().toISOString();
-      getIo().emit("order:paid", { orderId });
+      getIo().to(`user:${order.userId}`).emit("order:paid", { orderId });
     }
   }
 
