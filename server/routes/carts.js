@@ -89,6 +89,40 @@ router.post("/items", requireAuth, (req, res) => {
 });
 
 /**
+ * POST /api/cart/merge
+ * Merges an array of items into the cart in a single request.
+ */
+router.post("/merge", requireAuth, (req, res) => {
+  const { items } = req.body;
+  if (!Array.isArray(items)) return res.status(400).json({ error: "items must be an array" });
+
+  let cart = db.carts.find((c) => c.userId === req.user.id);
+  if (!cart) {
+    cart = { id: Date.now(), userId: req.user.id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), items: [] };
+    db.carts.push(cart);
+  }
+
+  for (const g of items) {
+    if (cart.items.length >= 10) break;
+    const product = db.products.find((p) => p.id === g.productId);
+    if (!product || product.amount === 0) continue;
+    const existing = cart.items.find((i) => i.productId === g.productId);
+    if (existing) continue;
+    cart.items.unshift({
+      productId: g.productId,
+      name: product.name,
+      code: product.code,
+      image: product.medias[0] || null,
+      priceSnapshot: product.price,
+      quantity: Math.min(g.quantity, product.amount, 10),
+    });
+  }
+
+  cart.updatedAt = new Date().toISOString();
+  res.json(cart);
+});
+
+/**
  * PUT /api/cart/items/:productId
  * Updates the quantity of a cart item.
  */

@@ -29,3 +29,10 @@ export function clearCart() {
     method: "DELETE",
   });
 }
+
+export function mergeCart(items) {
+  return request("/cart/merge", {
+    method: "POST",
+    body: JSON.stringify({ items }),
+  });
+}

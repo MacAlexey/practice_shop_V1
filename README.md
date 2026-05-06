@@ -13,39 +13,39 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 
 ## Features
 
-- Product catalog with search and sort
-- Pagination
-- "Out of stock" button when product amount is 0
-- "Only N left" warning when stock is low (≤ 5)
-- Server-side cart with optimistic updates
-- Cart stored in localStorage for guests, synced to server for logged-in users
-- Guest cart merges into server cart on login
-- New items added to top of cart
-- Cart dropdown in navbar
-- Checkout for both guests and logged-in users
-- Price snapshot — warns if price changed since item was added to cart
-- Out of stock items shown in cart (dimmed with red label if product is deleted or amount = 0)
+**Catalog**
+- Product listing with search, sort, and pagination
+- Out of stock indicator and low stock warning (≤ 5 items left)
+
+**Cart**
+- Persistent cart: localStorage for guests, server-side for authenticated users
+- Guest cart merges into user cart on login
+- Optimistic UI updates with rollback on error
+- Cart dropdown in navbar, limited to 10 unique items
+- Out of stock label for unavailable or deleted products
 - Deleted products automatically removed from all carts
-- Stock deducted automatically when order is placed
-- Stock validated before order creation — returns error if quantity exceeds available amount
-- Server-side price recalculation on order creation — client-sent totalPrice is ignored, recalculated from current db prices
-- Cart limited to 10 unique items (enforced on both client and server)
-- Order stores cartId — relation between order and the cart it was created from
-- Stripe payment integration — Pay Now (redirect to Stripe) or Pay Later (within 7 days)
-- Real-time order status update via WebSocket — status changes to Paid instantly after Stripe webhook
+
+**Checkout & Orders**
+- Checkout for both guests and logged-in users
+- Price snapshot with warning if price changed since item was added
+- Server-side price recalculation — client value is ignored
+- Stock validation before order creation
+- Pay Now (Stripe redirect) or Pay Later (7-day window)
+- Real-time order status update via WebSocket after payment
 - Orders history page
-- User authentication (register / login / logout)
-- OTP account verification on registration (default: `1234`)
+
+**Auth**
+- Register / login / logout
+- OTP verification on registration (default: `1234`)
 - Forgot password flow: email → OTP → new password
-- Refresh token — auto re-issue access token on expiry
-- Protected routes (redirect to login if not authenticated)
-- Toast notifications (max 1 at a time)
+- JWT access token (15m) + refresh token (7d)
+- Protected routes
+
+**Other**
+- File upload: images converted to .webp, videos get a thumbnail
+- Products CRUD API
 - Swagger UI at `/api-docs`
-- 404 page
-- File upload API (images converted to .webp, videos get a first-frame thumbnail)
-- Products CRUD API (name, code, medias, price, amount)
-- Product catalog is public (no auth required)
-- All other non-auth endpoints require a valid access token
+- Toast notifications
 
 ## Project Structure
 
@@ -140,7 +140,7 @@ npm run dev
 | GET | /api/orders | Get user orders |
 | POST | /api/orders | Create order |
 | GET | /api/orders/:id | Get order by ID |
-| POST | /api/upload | Upload image or video file |
+| POST | /api/media | Upload image or video file |
 | POST | /api/payments/create-session | Create Stripe Checkout session |
 | POST | /api/payments/webhook | Receive Stripe webhook events |
 | GET | /api/products | Get all products (public) |
@@ -152,6 +152,7 @@ npm run dev
 | POST | /api/cart/items | Add item to cart |
 | PUT | /api/cart/items/:productId | Update item quantity |
 | DELETE | /api/cart/items/:productId | Remove item from cart |
+| POST | /api/cart/merge | Merge guest cart into user cart |
 | DELETE | /api/cart | Clear cart |
 | GET | /api/users | Get all users (dev only) |
 

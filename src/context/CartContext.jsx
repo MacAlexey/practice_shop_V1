@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import {
   getCart,
   addToCart as apiAddToCart,
+  mergeCart,
   updateCartItem,
   removeCartItem,
   clearCart as apiClearCart,
@@ -64,11 +65,7 @@ export function CartProvider({ children }) {
 
       getCart()
         .then((serverCart) => {
-          const mergePromises = guestCart.map((g) =>
-            apiAddToCart(g.productId, g.quantity).catch(() => {})
-          );
-
-          return Promise.all(mergePromises).then(() => getCart());
+          return mergeCart(guestCart);
         })
         .then((updatedCart) => {
           setCart(updatedCart.items);
