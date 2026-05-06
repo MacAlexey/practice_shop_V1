@@ -16,6 +16,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [priceChanges, setPriceChanges] = useState([]);
+  const [actualTotal, setActualTotal] = useState(null);
 
   useEffect(() => {
     getProducts()
@@ -34,6 +35,12 @@ export default function CheckoutPage() {
             };
           });
         setPriceChanges(changes);
+
+        const recalculated = cart.reduce((sum, item) => {
+          const current = products.find((p) => p.id === item.productId);
+          return sum + (current ? current.price : item.priceSnapshot) * item.quantity;
+        }, 0);
+        if (recalculated !== totalPrice) setActualTotal(recalculated);
       })
       .catch(() => {});
   }, []);
@@ -88,9 +95,19 @@ export default function CheckoutPage() {
             </li>
           ))}
         </ul>
-        <div className="mt-3 pt-3 border-t font-bold flex justify-between">
+        <div className="mt-3 pt-3 border-t font-bold flex justify-between items-start">
           <span>Total</span>
-          <span>{formatPrice(totalPrice)}</span>
+          <div className="text-right">
+            {actualTotal ? (
+              <>
+                <p className="line-through text-gray-400 text-sm font-normal">{formatPrice(totalPrice)}</p>
+                <p>{formatPrice(actualTotal)}</p>
+                <p className="text-xs text-orange-500 font-normal">Recalculated at current prices</p>
+              </>
+            ) : (
+              <span>{formatPrice(totalPrice)}</span>
+            )}
+          </div>
         </div>
       </div>
 

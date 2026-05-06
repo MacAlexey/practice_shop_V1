@@ -52,6 +52,15 @@ router.post("/", (req, res) => {
       .json({ error: "Please fill in all fields and add items to cart" });
   }
 
+  for (const item of items) {
+    const product = db.products.find((p) => p.id === item.productId);
+    if (!product || product.amount < item.quantity) {
+      return res
+        .status(400)
+        .json({ error: `Not enough stock for ${item.name}` });
+    }
+  }
+
   const order = {
     id: db.nextOrderId++,
     userId,
@@ -60,7 +69,13 @@ router.post("/", (req, res) => {
     email: userEmail,
     address,
     items,
-    totalPrice,
+    totalPrice: items.reduce((sum, item) => {
+      const product = db.products.find((p) => p.id === item.productId);
+      return (
+        sum + (product ? product.price : item.priceSnapshot) * item.quantity
+      );
+    }, 0),
+
     status: "Pending",
     paymentStatus: "unpaid",
     paidAt: null,
