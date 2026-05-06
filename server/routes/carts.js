@@ -23,7 +23,9 @@ router.get("/", requireAuth, (req, res) => {
 
   const itemsWithStatus = cart.items.map((item) => ({
     ...item,
-    unavailable: !db.products.find((p) => p.id === item.productId),
+    outOfStock:
+      !db.products.find((p) => p.id === item.productId) ||
+      db.products.find((p) => p.id === item.productId)?.amount === 0,
   }));
   res.json({ ...cart, items: itemsWithStatus });
 });

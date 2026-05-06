@@ -75,6 +75,12 @@ router.delete("/:id", requireAuth, (req, res) => {
   if (index === -1) return res.status(404).json({ error: "Product not found" });
 
   db.products.splice(index, 1);
+  db.carts.forEach((cart) => {
+    cart.items = cart.items.filter(
+      (item) => item.productId !== Number(req.params.id)
+    );
+  });
+
   res.json({ message: "Product deleted" });
 });
 

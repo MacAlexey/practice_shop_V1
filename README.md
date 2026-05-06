@@ -24,7 +24,8 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 - Cart dropdown in navbar
 - Checkout for both guests and logged-in users
 - Price snapshot — warns if price changed since item was added to cart
-- Unavailable items shown in cart (dimmed with red label if product deleted from catalog)
+- Out of stock items shown in cart (dimmed with red label if product is deleted or amount = 0)
+- Deleted products automatically removed from all carts
 - Stock deducted automatically when order is placed
 - Stock validated before order creation — returns error if quantity exceeds available amount
 - Server-side price recalculation on order creation — client-sent totalPrice is ignored, recalculated from current db prices
