@@ -1,6 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { body, validationResult } from "express-validator";
 import { db } from "../db.js";
 import { generateTokens } from "../utils/tokens.js";
 import { requireAuth } from "../middleware/requireAuth.js";
@@ -8,16 +9,27 @@ import { REFRESH_SECRET } from "../config.js";
 
 const router = Router();
 
+function validate(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: errors.array()[0].msg });
+    return false;
+  }
+  return true;
+}
+
 /**
  * POST /api/auth/register
  * Creates a new user account. Returns email for OTP verification.
  */
-router.post("/register", async (req, res) => {
+router.post("/register",
+  body("name").trim().notEmpty().withMessage("Name is required"),
+  body("email").isEmail().withMessage("Valid email is required"),
+  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
+  async (req, res) => {
   const { name, email, password } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
+  if (!validate(req, res)) return;
 
   if (db.users.find((u) => u.email === email)) {
     return res.status(400).json({ error: "Email already registered" });
@@ -45,12 +57,13 @@ router.post("/register", async (req, res) => {
  * Validates credentials and returns tokens.
  * Returns 403 with email if account is not verified.
  */
-router.post("/login", async (req, res) => {
+router.post("/login",
+  body("email").isEmail().withMessage("Valid email is required"),
+  body("password").notEmpty().withMessage("Password is required"),
+  async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
+  if (!validate(req, res)) return;
 
   const user = db.users.find((u) => u.email === email);
   if (!user)
@@ -93,7 +106,10 @@ router.post("/refresh", (req, res) => {
     const tokens = generateTokens(decoded);
     db.refreshTokens.delete(refreshToken);
     db.refreshTokens.add(tokens.refreshToken);
-    res.json({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
+    res.json({
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
   } catch {
     db.refreshTokens.delete(refreshToken);
     res

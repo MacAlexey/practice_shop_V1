@@ -1,6 +1,16 @@
 import { Router } from "express";
+import { body, validationResult } from "express-validator";
 import { db } from "../db.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+
+function validate(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: errors.array()[0].msg });
+    return false;
+  }
+  return true;
+}
 
 const router = Router();
 
@@ -34,11 +44,12 @@ router.get("/", requireAuth, (req, res) => {
  * POST /api/cart/items
  * Adds a product to the cart or increases quantity if already exists.
  */
-router.post("/items", requireAuth, (req, res) => {
+router.post("/items", requireAuth,
+  body("productId").isInt({ min: 1 }).withMessage("Valid productId is required"),
+  body("quantity").optional().isInt({ min: 1, max: 10 }).withMessage("Quantity must be between 1 and 10"),
+  (req, res) => {
+  if (!validate(req, res)) return;
   const { productId, quantity = 1 } = req.body;
-
-  if (!productId)
-    return res.status(400).json({ error: "productId is required" });
 
   const product = db.products.find((p) => p.id === productId);
   if (!product) return res.status(404).json({ error: "Product not found" });

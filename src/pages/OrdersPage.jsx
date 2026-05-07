@@ -41,8 +41,8 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (!user) return;
-    const socket = io("http://localhost:3001");
-    socket.emit("join", user.id);
+    const token = localStorage.getItem("accessToken");
+    const socket = io("http://localhost:3001", { auth: { token } });
     socket.on("order:paid", ({ orderId }) => {
       setOrders((prev) =>
         prev.map((o) => o.id === orderId ? { ...o, paymentStatus: "paid" } : o)

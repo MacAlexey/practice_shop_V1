@@ -3,6 +3,7 @@ import { createServer } from "http";
 import swaggerUi from "swagger-ui-express";
 import { createRequire } from "module";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import { PORT } from "./config.js";
 import { initSocket } from "./socket.js";
 import authRouter from "./routes/auth.js";
@@ -21,6 +22,7 @@ const server = createServer(app);
 initSocket(server); // Initialize Socket.IO with the HTTP server
 
 app.use(cors());
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 100 }));
 app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -29,7 +31,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/users", usersRouter);
 app.use("/uploads", express.static("uploads"));
-app.use("/api/upload", uploadRouter);
+app.use("/api/media", uploadRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/cart", cartsRouter);
 app.use("/api/payments", paymentsRouter);

@@ -1,8 +1,18 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
+import { body, validationResult } from "express-validator";
 import { db } from "../db.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { JWT_SECRET } from "../config.js";
+
+function validate(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: errors.array()[0].msg });
+    return false;
+  }
+  return true;
+}
 
 const router = Router();
 
@@ -28,7 +38,10 @@ router.get("/", (req, res) => {
  * POST /api/orders
  * Creates a new order. Works for both authenticated users and guests.
  */
-router.post("/", (req, res) => {
+router.post("/",
+  body("address").trim().notEmpty().withMessage("Address is required"),
+  body("items").isArray({ min: 1 }).withMessage("Items must be a non-empty array"),
+  (req, res) => {
   const { name, email, address, items, totalPrice, cartId } = req.body;
 
   const header = req.headers.authorization;
@@ -46,10 +59,10 @@ router.post("/", (req, res) => {
     } catch {}
   }
 
-  if (!userName || !userEmail || !address || !items || items.length === 0) {
-    return res
-      .status(400)
-      .json({ error: "Please fill in all fields and add items to cart" });
+  if (!validate(req, res)) return;
+
+  if (!userName || !userEmail) {
+    return res.status(400).json({ error: "Please fill in all fields" });
   }
 
   for (const item of items) {
