@@ -41,8 +41,14 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 - JWT access token (15m) + refresh token (7d)
 - Protected routes
 
+**Security**
+- Rate limiting: 100 requests per 15 minutes per IP
+- Input validation on auth, orders, and cart endpoints
+- JWT verification on Socket.io connection
+- Secrets managed via `.env` with startup validation
+
 **Other**
-- File upload: images converted to .webp, videos get a thumbnail
+- File upload: up to 10 files at once, images converted to .webp, videos get a thumbnail
 - Products CRUD API
 - Swagger UI at `/api-docs`
 - Toast notifications
