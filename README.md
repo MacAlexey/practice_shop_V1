@@ -55,9 +55,10 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 - Secrets managed via `.env` with startup validation
 
 **Coupons**
-- Admin can create, list, and delete coupons (synced with Stripe)
+- Create, list, and delete coupons (synced with Stripe)
 - Supports percent and fixed amount discounts
 - Applied to the entire order at checkout
+- Note: coupon management endpoints currently require auth only — admin role not yet implemented
 
 **Other**
 - File upload: up to 10 files at once, images converted to .webp, videos get a thumbnail
