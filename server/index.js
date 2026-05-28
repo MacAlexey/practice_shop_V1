@@ -13,6 +13,8 @@ import uploadRouter from "./routes/media.js";
 import productsRouter from "./routes/products.js";
 import cartsRouter from "./routes/carts.js";
 import paymentsRouter from "./routes/payments.js";
+import reportsRouter from "./routes/reports.js";
+import couponsRouter from "./routes/coupons.js";
 
 const require = createRequire(import.meta.url);
 const swaggerDocument = require("./swagger.json");
@@ -35,6 +37,8 @@ app.use("/api/media", uploadRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/cart", cartsRouter);
 app.use("/api/payments", paymentsRouter);
+app.use("/api/reports", reportsRouter);
+app.use("/api/coupons", couponsRouter);
 
 server.listen(PORT, () => {
   console.log(`Server running: http://localhost:${PORT}`);

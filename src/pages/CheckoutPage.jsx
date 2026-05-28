@@ -15,6 +15,7 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({ name: "", email: "", address: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [couponCode, setCouponCode] = useState("");
   const [priceChanges, setPriceChanges] = useState([]);
   const [actualTotal, setActualTotal] = useState(null);
 
@@ -74,7 +75,10 @@ export default function CheckoutPage() {
       }
 
       if (payMode === "now") {
-        const { url } = await createPaymentSession(order.id);
+        const { url } = await createPaymentSession(
+          order.id,
+          couponCode || undefined
+        );
         window.location.href = url;
       } else {
         clearCart();
@@ -187,6 +191,16 @@ export default function CheckoutPage() {
             </div>
           </>
         )}
+        <div>
+          <label className="block text-sm font-medium mb-1">Promo Code</label>
+          <input
+            type="text"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value)}
+            placeholder="Enter promo code"
+            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
         <div>
           <label className="block text-sm font-medium mb-1">
             Delivery Address

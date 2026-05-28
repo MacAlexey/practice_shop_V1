@@ -19,4 +19,7 @@ export const db = {
   })),
   nextProductId: PRODUCTS.length + 1,
   carts: [],
+  reports: [],
+  nextReportId: 1,
+  coupons: [],
 };

@@ -14,7 +14,8 @@
 ## Writing code
 - Do not write code directly into files
 - Do not show code suggestions unless the user explicitly asks
-- When asked, show what to write and where (file path + line number), let them write it themselves
+- When asked, show what to write and where (file path + line number) — the user writes it themselves
+- If the user says "напиши ты", "сделай ты", "сделай сам", "сделай", or similar phrases in context, Claude must write the code directly into the file himself
 
 ## "проверь" command
 Triggers: "проверь", "проверяй", "check", "чекни", "ghjdthm"
