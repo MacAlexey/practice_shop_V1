@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 export default function LoginPage() {
   const { login } = useAuth();
   const { switchToUser } = useCart();
-
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -39,49 +38,24 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4">
-      <div className="bg-white rounded-xl shadow p-8 w-full max-w-sm">
-        <h1 className="text-2xl font-bold mb-6 text-center">Sign In</h1>
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-8 w-full max-w-sm">
+        <h1 className="text-2xl font-bold mb-6 text-center text-slate-800">Sign In</h1>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            required
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required
+            className="border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 placeholder-slate-400" />
+          <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} required
+            className="border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 placeholder-slate-400" />
           <div className="text-right">
-            <Link
-              to="/forgot"
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Forgot password?
-            </Link>
+            <Link to="/forgot" className="text-sm text-indigo-600 hover:underline">Forgot password?</Link>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition disabled:opacity-50"
-          >
+          <button type="submit" disabled={loading}
+            className="bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg transition disabled:opacity-50">
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-slate-500 mt-4">
           No account?{" "}
-          <Link to="/register" className="text-blue-600 hover:underline">
-            Register
-          </Link>
+          <Link to="/register" className="text-indigo-600 hover:underline">Register</Link>
         </p>
       </div>
     </div>

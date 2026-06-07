@@ -26,22 +26,14 @@ export default function ChangePasswordPage() {
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4">
-      <div className="bg-white rounded-xl shadow p-8 w-full max-w-sm">
-        <h1 className="text-2xl font-bold mb-6">New Password</h1>
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-8 w-full max-w-sm">
+        <h1 className="text-2xl font-bold mb-6 text-slate-800">New Password</h1>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+          <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter new password"
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-2 rounded-lg transition"
-          >
+            className="border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 placeholder-slate-400" />
+          <button type="submit" disabled={loading}
+            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white py-2 rounded-lg transition">
             {loading ? "Saving..." : "Change Password"}
           </button>
         </form>

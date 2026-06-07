@@ -35,6 +35,12 @@ router.post("/create-session", requireAuth, async (req, res) => {
   if (couponCode && !coupon)
     return res.status(400).json({ error: "Invalid coupon code" });
 
+  if (coupon) {
+    const stripePromo = await stripe.promotionCodes.retrieve(coupon.stripePromoCodeId);
+    if (!stripePromo.active)
+      return res.status(400).json({ error: "Coupon is no longer active" });
+  }
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: order.items.map((item) => ({
@@ -52,6 +58,14 @@ router.post("/create-session", requireAuth, async (req, res) => {
     invoice_creation: { enabled: true },
     ...(coupon && { discounts: [{ coupon: coupon.stripeCouponId }] }),
   });
+
+  if (coupon) {
+    order.couponCode = coupon.code;
+    order.discountAmount =
+      coupon.discountType === "percent"
+        ? Math.round(order.totalPrice * (coupon.discountValue / 100))
+        : coupon.discountValue;
+  }
 
   res.json({ url: session.url });
 });
@@ -103,6 +117,7 @@ router.post("/webhook", (req, res) => {
       order.paidAt = new Date().toISOString();
       order.stripeInvoiceId = session.invoice;
       order.stripePaymentIntentId = session.payment_intent;
+      order.finalPrice = session.amount_total;
 
       getIo().to(`user:${order.userId}`).emit("order:paid", { orderId });
     }
@@ -120,6 +135,20 @@ router.post("/webhook", (req, res) => {
       });
       if (order.userId) {
         getIo().to(`user:${order.userId}`).emit("order:expired", { orderId });
+      }
+    }
+  }
+
+  if (event.type === "charge.refund.updated") {
+    const refund = event.data.object;
+    if (refund.status === "failed") {
+      const order = db.orders.find((o) => o.refundId === refund.id);
+      if (order) {
+        order.paymentStatus = "paid";
+        order.refundId = null;
+        order.refundedAt = null;
+        const report = db.reports.find((r) => r.orderId === order.id && r.status === "resolved");
+        if (report) report.status = "open";
       }
     }
   }

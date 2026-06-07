@@ -16,6 +16,7 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 **Catalog**
 - Product listing with search, sort, and pagination
 - Out of stock indicator and low stock warning (≤ 5 items left)
+- Product detail page with full review list and average rating
 
 **Cart**
 - Persistent cart: localStorage for guests, server-side for authenticated users
@@ -49,16 +50,23 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 - Protected routes
 
 **Security**
-- Rate limiting: 100 requests per 15 minutes per IP
+- Rate limiting: 1000 req/15 min in development, 100 in production
 - Input validation on auth, orders, and cart endpoints
 - JWT verification on Socket.io connection
 - Secrets managed via `.env` with startup validation
 
 **Coupons**
-- Create, list, and delete coupons (synced with Stripe)
+- Create, list, update, and delete coupons (synced with Stripe)
 - Supports percent and fixed amount discounts
 - Applied to the entire order at checkout
-- Note: coupon management endpoints currently require auth only — admin role not yet implemented
+- Coupon management requires admin role
+
+**Reviews & Ratings**
+- Users with a paid order can leave a star rating (1–5) and optional comment
+- One review per user per product — can edit or delete
+- Average rating and review count shown on product cards
+- Full review list visible on product detail page
+- Admin can delete any review
 
 **Other**
 - File upload: up to 10 files at once, images converted to .webp, videos get a thumbnail
@@ -77,7 +85,8 @@ src/
 │   ├── orders.js          # Orders API calls
 │   ├── payments.js        # Payments API calls
 │   ├── products.js        # Products API calls
-│   └── reports.js         # Reports API calls
+│   ├── reports.js         # Reports API calls
+│   └── reviews.js         # Reviews API calls
 ├── constants.js           # Shared frontend constants (currency)
 ├── components/
 │   ├── Cart.jsx           # Cart item list
@@ -100,6 +109,7 @@ src/
 │   ├── LoginPage.jsx
 │   ├── NotFoundPage.jsx
 │   ├── OrdersPage.jsx
+│   ├── ProductPage.jsx
 │   ├── ProfilePage.jsx
 │   ├── RegisterPage.jsx
 │   ├── ShopPage.jsx
@@ -116,6 +126,7 @@ server/
 ├── db.js                  # In-memory storage (seeded from products.js)
 ├── socket.js              # Socket.io initialization
 ├── middleware/
+│   ├── requireAdmin.js    # Admin role check middleware
 │   └── requireAuth.js     # JWT auth middleware
 ├── routes/
 │   ├── auth.js            # Auth endpoints
@@ -126,6 +137,7 @@ server/
 │   ├── payments.js        # Stripe payment endpoints
 │   ├── products.js        # Products CRUD endpoints
 │   ├── reports.js         # Report and refund endpoints
+│   ├── reviews.js         # Reviews endpoints
 │   └── users.js           # Users endpoints
 ├── utils/
 │   └── tokens.js          # generateTokens helper
@@ -168,16 +180,24 @@ npm run dev
 | POST | /api/payments/create-session | Create Stripe Checkout session |
 | POST | /api/payments/webhook | Receive Stripe webhook events |
 | GET | /api/payments/invoice/:orderId | Get Stripe invoice PDF URL |
+| GET | /api/reports | Get reports for current user |
 | POST | /api/reports | Submit a report for a paid order |
 | POST | /api/reports/:id/refund | Issue Stripe refund for a report |
 | GET | /api/coupons | List all coupons |
-| POST | /api/coupons | Create coupon (synced with Stripe) |
-| DELETE | /api/coupons/:code | Delete coupon (synced with Stripe) |
+| POST | /api/coupons | Create coupon (admin, synced with Stripe) |
+| PUT | /api/coupons/:code | Update coupon (admin, synced with Stripe) |
+| DELETE | /api/coupons/:code | Delete coupon (admin, synced with Stripe) |
 | GET | /api/products | Get all products (public) |
-| POST | /api/products | Create product |
+| POST | /api/products | Create product (admin) |
 | GET | /api/products/:id | Get product by ID (public) |
-| PUT | /api/products/:id | Update product |
-| DELETE | /api/products/:id | Delete product |
+| PUT | /api/products/:id | Update product (admin) |
+| DELETE | /api/products/:id | Delete product (admin) |
+| GET | /api/products/:id/reviews | Get reviews + average rating for a product |
+| GET | /api/reviews/ratings | Get average ratings for all products (batch) |
+| GET | /api/reviews/my | Get current user's reviews |
+| POST | /api/reviews | Submit a review (requireAuth) |
+| PUT | /api/reviews/:id | Edit own review |
+| DELETE | /api/reviews/:id | Delete own review (or admin) |
 | GET | /api/cart | Get current user's cart |
 | POST | /api/cart/items | Add item to cart |
 | PUT | /api/cart/items/:productId | Update item quantity |
@@ -187,5 +207,5 @@ npm run dev
 | GET | /api/users | Get all users (dev only) |
 
 > **Note:** Backend uses in-memory storage — data resets on server restart.
-> All endpoints except `/api/auth/*`, `GET /api/products`, and `GET /api/products/:id` require a valid access token.
-> For Stripe webhooks to work locally, run `ngrok http 3001` and add the public URL as a webhook endpoint in the Stripe dashboard.
+> Public endpoints: `/api/auth/*`, `GET /api/products`, `GET /api/products/:id`, `GET /api/products/:id/reviews`, `GET /api/reviews/ratings`. All others require a valid access token. Admin endpoints require `role: "admin"` in the JWT payload.
+> For Stripe webhooks to work locally, run: `stripe listen --forward-to localhost:3001/api/payments/webhook`

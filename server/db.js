@@ -1,9 +1,21 @@
 import { PRODUCTS } from "../src/data/products.js";
+import bcrypt from "bcrypt";
+
+const adminPassword = await bcrypt.hash("admin123", 10);
 
 /** In-memory storage — resets on server restart */
 export const db = {
-  users: [],
-  nextUserId: 1,
+  users: [
+    {
+      id: 1,
+      name: "Admin",
+      email: "admin@shop.com",
+      password: adminPassword,
+      role: "admin",
+      verified: true,
+    },
+  ],
+  nextUserId: 2,
   orders: [],
   nextOrderId: 1,
   refreshTokens: new Set(),
@@ -22,4 +34,6 @@ export const db = {
   reports: [],
   nextReportId: 1,
   coupons: [],
+  reviews: [],
+  nextReviewId: 1,
 };

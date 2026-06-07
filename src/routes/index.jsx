@@ -12,12 +12,14 @@ import VerifyOtpPage from "../pages/VerifyOtpPage";
 import ForgotPage from "../pages/ForgotPage";
 import VerifyOtpForgotPage from "../pages/VerifyOtpForgotPage";
 import ChangePasswordPage from "../pages/ChangePasswordPage";
+import ProductPage from "../pages/ProductPage";
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* Shop */}
       <Route path="/" element={<ShopPage />} />
+      <Route path="/products/:id" element={<ProductPage />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/orders" element={<OrdersPage />} />

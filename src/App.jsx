@@ -26,7 +26,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <div className="min-h-screen bg-grey-100">
+          <div className="min-h-screen">
             <Navbar />
             <Toaster
               position="top-center"

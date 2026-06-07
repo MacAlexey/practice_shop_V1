@@ -2,6 +2,7 @@ import { Router } from "express";
 import Stripe from "stripe";
 import { db } from "../db.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { requireAdmin } from "../middleware/requireAdmin.js";
 import { STRIPE_SECRET_KEY } from "../config.js";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY);
@@ -12,24 +13,35 @@ const router = Router();
  * POST /api/reports/:id/refund
  * Issues a Stripe refund for the order linked to the report.
  */
-// TODO: replace requireAuth with requireAdmin middleware once admin roles are implemented
-router.post("/:id/refund", requireAuth, async (req, res) => {
+router.post("/:id/refund", requireAdmin, async (req, res) => {
   const report = db.reports.find((r) => r.id === Number(req.params.id));
   if (!report) return res.status(404).json({ error: "Report not found" });
+  if (report.status === "resolved" || report.status === "rejected")
+    return res.status(400).json({ error: "Report already closed" });
 
   const order = db.orders.find((o) => o.id === report.orderId);
   if (!order) return res.status(404).json({ error: "Order not found" });
+  if (order.paymentStatus === "refunded")
+    return res.status(400).json({ error: "Order already refunded" });
   if (!order.stripePaymentIntentId)
     return res.status(400).json({ error: "No payment intent found for this order" });
+
+  report.status = "in_progress";
+  order.paymentStatus = "refunding";
 
   try {
     const refund = await stripe.refunds.create({
       payment_intent: order.stripePaymentIntentId,
     });
     order.paymentStatus = "refunded";
+    order.status = "cancelled";
+    order.refundId = refund.id;
+    order.refundedAt = new Date().toISOString();
     report.status = "resolved";
     res.json({ refundId: refund.id, status: refund.status });
   } catch (err) {
+    order.paymentStatus = "paid";
+    report.status = "open";
     res.status(500).json({ error: err.message });
   }
 });
@@ -38,7 +50,7 @@ router.post("/:id/refund", requireAuth, async (req, res) => {
  * POST /api/reports
  * Creates a report for a paid order.
  */
-router.post("/", requireAuth, (req, res) => {
+router.post("/", requireAuth, async (req, res) => {
   const { orderId, reason, description } = req.body;
 
   if (!orderId || !reason)
@@ -51,6 +63,11 @@ router.post("/", requireAuth, (req, res) => {
   if (order.paymentStatus !== "paid")
     return res.status(400).json({ error: "Can only report paid orders" });
 
+  const existing = db.reports.find(
+    (r) => r.orderId === Number(orderId) && r.userId === req.user.id
+  );
+  if (existing) return res.status(400).json({ error: "You already reported this order" });
+
   const report = {
     id: db.nextReportId++,
     orderId: Number(orderId),
@@ -62,7 +79,52 @@ router.post("/", requireAuth, (req, res) => {
   };
 
   db.reports.push(report);
+
+  if (order.stripePaymentIntentId) {
+    report.status = "in_progress";
+    order.paymentStatus = "refunding";
+    try {
+      const refund = await stripe.refunds.create({
+        payment_intent: order.stripePaymentIntentId,
+      });
+      order.paymentStatus = "refunded";
+      order.status = "cancelled";
+      order.refundId = refund.id;
+      order.refundedAt = new Date().toISOString();
+      report.status = "resolved";
+    } catch {
+      order.paymentStatus = "paid";
+      report.status = "open";
+    }
+  }
+
   res.status(201).json(report);
+});
+
+/**
+ * GET /api/reports
+ * Returns all reports (admin) or own reports (user).
+ */
+router.get("/", requireAuth, (req, res) => {
+  if (req.user.role === "admin") return res.json(db.reports);
+  res.json(db.reports.filter((r) => r.userId === req.user.id));
+});
+
+/**
+ * PATCH /api/reports/:id
+ * Updates report status (admin only).
+ */
+router.patch("/:id", requireAdmin, (req, res) => {
+  const { status } = req.body;
+  const allowed = ["open", "in_progress", "resolved", "rejected"];
+  if (!allowed.includes(status))
+    return res.status(400).json({ error: `Status must be one of: ${allowed.join(", ")}` });
+
+  const report = db.reports.find((r) => r.id === Number(req.params.id));
+  if (!report) return res.status(404).json({ error: "Report not found" });
+
+  report.status = status;
+  res.json(report);
 });
 
 export default router;

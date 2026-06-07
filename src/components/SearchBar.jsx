@@ -6,12 +6,12 @@ export default function SearchBar({ searchQuery, onSearch, sortBy, onSort }) {
         placeholder="Search products..."
         value={searchQuery}
         onChange={(e) => onSearch(e.target.value)}
-        className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="flex-1 bg-white border border-slate-200 text-slate-800 placeholder-slate-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm"
       />
       <select
         value={sortBy}
         onChange={(e) => onSort(e.target.value)}
-        className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="bg-white border border-slate-200 text-slate-800 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm"
       >
         <option value="default">Default</option>
         <option value="price-asc">Price: Low to High</option>

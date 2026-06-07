@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "../db.js";
-import { requireAuth } from "../middleware/requireAuth.js";
+import { requireAdmin } from "../middleware/requireAdmin.js";
 
 const router = Router();
 
@@ -23,10 +23,28 @@ router.get("/:id", (req, res) => {
 });
 
 /**
+ * GET /api/products/:id/reviews
+ * Returns reviews for a product with averageRating.
+ */
+router.get("/:id/reviews", (req, res) => {
+  const productId = Number(req.params.id);
+  const product = db.products.find((p) => p.id === productId);
+  if (!product) return res.status(404).json({ error: "Product not found" });
+
+  const reviews = db.reviews.filter((r) => r.productId === productId);
+  const averageRating =
+    reviews.length > 0
+      ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10
+      : null;
+
+  res.json({ reviews, averageRating, total: reviews.length });
+});
+
+/**
  * POST /api/products
  * Creates a new product.
  */
-router.post("/", requireAuth, (req, res) => {
+router.post("/", requireAdmin, (req, res) => {
   const { name, code, medias, price, amount } = req.body;
 
   if (!name || !code || price == null || amount == null) {
@@ -52,7 +70,7 @@ router.post("/", requireAuth, (req, res) => {
  * PUT /api/products/:id
  * Updates a product by ID.
  */
-router.put("/:id", requireAuth, (req, res) => {
+router.put("/:id", requireAdmin, (req, res) => {
   const product = db.products.find((p) => p.id === Number(req.params.id));
   if (!product) return res.status(404).json({ error: "Product not found" });
 
@@ -70,7 +88,7 @@ router.put("/:id", requireAuth, (req, res) => {
  * DELETE /api/products/:id
  * Deletes a product by ID.
  */
-router.delete("/:id", requireAuth, (req, res) => {
+router.delete("/:id", requireAdmin, (req, res) => {
   const index = db.products.findIndex((p) => p.id === Number(req.params.id));
   if (index === -1) return res.status(404).json({ error: "Product not found" });
 

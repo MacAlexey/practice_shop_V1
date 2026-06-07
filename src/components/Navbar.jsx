@@ -23,16 +23,19 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="navbar-gradient border-b border-white/10 sticky top-0 z-50 backdrop-blur-sm">
       <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-        <Link to="/" className="text-xl font-bold text-blue-600">
+        <Link
+          to="/"
+          className="text-xl font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] tracking-wide"
+        >
           Lazada from Temu
         </Link>
 
         <div className="flex items-center gap-6">
           <Link
             to="/orders"
-            className="text-gray-600 hover:text-blue-600 transition"
+            className="text-gray-300 hover:text-indigo-400 transition"
           >
             Orders
           </Link>
@@ -40,9 +43,9 @@ export default function Navbar() {
           {user ? (
             <Link
               to="/profile"
-              className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition"
+              className="flex items-center gap-2 text-gray-300 hover:text-indigo-400 transition"
             >
-              <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
+              <div className="w-7 h-7 rounded-full bg-indigo-900 flex items-center justify-center text-xs font-bold text-indigo-400">
                 {user.name[0].toUpperCase()}
               </div>
               <span className="text-sm">{user.name}</span>
@@ -50,21 +53,20 @@ export default function Navbar() {
           ) : (
             <Link
               to="/login"
-              className="text-gray-600 hover:text-blue-600 transition text-sm"
+              className="text-gray-300 hover:text-indigo-400 transition text-sm"
             >
               Sign In
             </Link>
           )}
 
-          {/* Cart Button*/}
           <div className="relative" ref={ref}>
             <button
               onClick={() => setOpen((prev) => !prev)}
-              className="relative p-2 rounded-full hover:bg-gray-100 transition"
+              className="relative p-3 rounded-full bg-white hover:bg-white/90 transition"
             >
               <span className="text-2xl">🛒</span>
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                   {itemCount}
                 </span>
               )}

@@ -6,3 +6,7 @@ export function createReport(data) {
     body: JSON.stringify(data),
   });
 }
+
+export function getReports() {
+  return request("/reports");
+}

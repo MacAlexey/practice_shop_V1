@@ -22,73 +22,80 @@ function validate(req, res) {
  * POST /api/auth/register
  * Creates a new user account. Returns email for OTP verification.
  */
-router.post("/register",
+router.post(
+  "/register",
   body("name").trim().notEmpty().withMessage("Name is required"),
   body("email").isEmail().withMessage("Valid email is required"),
-  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters"),
   async (req, res) => {
-  const { name, email, password } = req.body;
+    const { name, email, password } = req.body;
 
-  if (!validate(req, res)) return;
+    if (!validate(req, res)) return;
 
-  if (db.users.find((u) => u.email === email)) {
-    return res.status(400).json({ error: "Email already registered" });
+    if (db.users.find((u) => u.email === email)) {
+      return res.status(400).json({ error: "Email already registered" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = {
+      id: db.nextUserId++,
+      name,
+      email,
+      password: hashedPassword,
+      verified: false,
+      role: "user",
+    };
+    db.users.push(user);
+    db.otps.set(email, "1234");
+
+    res.status(201).json({
+      message: "Registration successful. Please verify your account.",
+      email,
+    });
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = {
-    id: db.nextUserId++,
-    name,
-    email,
-    password: hashedPassword,
-    verified: false,
-  };
-  db.users.push(user);
-  db.otps.set(email, "1234");
-
-  res.status(201).json({
-    message: "Registration successful. Please verify your account.",
-    email,
-  });
-});
+);
 
 /**
  * POST /api/auth/login
  * Validates credentials and returns tokens.
  * Returns 403 with email if account is not verified.
  */
-router.post("/login",
+router.post(
+  "/login",
   body("email").isEmail().withMessage("Valid email is required"),
   body("password").notEmpty().withMessage("Password is required"),
   async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  if (!validate(req, res)) return;
+    if (!validate(req, res)) return;
 
-  const user = db.users.find((u) => u.email === email);
-  if (!user)
-    return res.status(400).json({ error: "Invalid email or password" });
+    const user = db.users.find((u) => u.email === email);
+    if (!user)
+      return res.status(400).json({ error: "Invalid email or password" });
 
-  const match = await bcrypt.compare(password, user.password);
-  if (!match)
-    return res.status(400).json({ error: "Invalid email or password" });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match)
+      return res.status(400).json({ error: "Invalid email or password" });
 
-  if (!user.verified) {
-    db.otps.set(user.email, "1234");
-    return res
-      .status(403)
-      .json({ error: "Account not verified", email: user.email });
+    if (!user.verified) {
+      db.otps.set(user.email, "1234");
+      return res
+        .status(403)
+        .json({ error: "Account not verified", email: user.email });
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user);
+    db.refreshTokens.add(refreshToken);
+
+    res.json({
+      accessToken,
+      refreshToken,
+      user: { id: user.id, name: user.name, email: user.email },
+    });
   }
-
-  const { accessToken, refreshToken } = generateTokens(user);
-  db.refreshTokens.add(refreshToken);
-
-  res.json({
-    accessToken,
-    refreshToken,
-    user: { id: user.id, name: user.name, email: user.email },
-  });
-});
+);
 
 /**
  * POST /api/auth/refresh
