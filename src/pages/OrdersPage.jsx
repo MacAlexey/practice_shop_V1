@@ -175,15 +175,15 @@ export default function OrdersPage() {
                                 <span className="text-xs text-green-600 font-medium">✓</span>
                                 <button
                                   onClick={() => { setReviewModal({ isEdit: true, reviewId: existingReview.id, productId: item.productId, productName: item.name }); setReviewRating(existingReview.rating); setReviewComment(existingReview.comment); }}
-                                  className="text-xs text-indigo-500 hover:text-indigo-400 transition">Edit</button>
+                                  className="text-xs text-indigo-600 hover:bg-indigo-50 font-medium px-2 py-0.5 rounded-md border border-indigo-200 hover:border-indigo-400 transition cursor-pointer">Edit</button>
                                 <button
                                   onClick={() => handleDeleteReview(existingReview.id)}
-                                  className="text-xs text-red-400 hover:text-red-500 transition">Delete</button>
+                                  className="text-xs text-red-500 hover:bg-red-50 font-medium px-2 py-0.5 rounded-md border border-red-200 hover:border-red-400 transition cursor-pointer">Delete</button>
                               </div>
                             ) : (
                               <button
                                 onClick={() => setReviewModal({ orderId: order.id, productId: item.productId, productName: item.name })}
-                                className="text-xs text-indigo-600 hover:text-indigo-500 font-medium transition">
+                                className="text-xs text-indigo-600 hover:bg-indigo-50 font-medium px-2 py-0.5 rounded-md border border-indigo-200 hover:border-indigo-400 transition cursor-pointer">
                                 Review
                               </button>
                             )
@@ -193,8 +193,21 @@ export default function OrdersPage() {
                     );
                   })}
                 </ul>
-                <div className="mt-3 pt-3 border-t border-slate-100 font-bold text-right text-slate-800">
-                  {formatPrice(order.totalPrice)}
+                <div className="mt-3 pt-3 border-t border-slate-100 text-sm text-right flex flex-col gap-1">
+                  <div className="flex justify-between text-slate-500">
+                    <span>Subtotal</span>
+                    <span>{formatPrice(order.totalPrice)}</span>
+                  </div>
+                  {order.discountAmount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Discount {order.couponCode ? `(${order.couponCode})` : ""}</span>
+                      <span>-{formatPrice(order.discountAmount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-slate-800 text-base pt-1 border-t border-slate-100">
+                    <span>Total paid</span>
+                    <span>{formatPrice(order.finalPrice ?? order.totalPrice)}</span>
+                  </div>
                 </div>
                 {canPay && (
                   <div className="mt-3 flex flex-col gap-2">

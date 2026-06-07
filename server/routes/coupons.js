@@ -31,7 +31,7 @@ router.post("/", requireAdmin, async (req, res) => {
     );
 
     const promoCode = await stripe.promotionCodes.create({
-      coupon: stripeCoupon.id,
+      promotion: { type: "coupon", coupon: stripeCoupon.id },
       code,
     });
 
@@ -83,7 +83,7 @@ router.put("/:code", requireAdmin, async (req, res) => {
         : { amount_off: discountValue, currency: CURRENCY_VND, duration: "once" }
     );
     const newPromoCode = await stripe.promotionCodes.create({
-      coupon: newStripeCoupon.id,
+      promotion: { type: "coupon", coupon: newStripeCoupon.id },
       code: coupon.code,
     });
 
