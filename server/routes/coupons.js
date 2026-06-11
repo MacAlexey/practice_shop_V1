@@ -1,7 +1,6 @@
 import { Router } from "express";
 import Stripe from "stripe";
 import { db } from "../db.js";
-import { requireAuth } from "../middleware/requireAuth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { STRIPE_SECRET_KEY } from "../config.js";
 import { CURRENCY_VND } from "../constants.js";
@@ -55,7 +54,7 @@ router.post("/", requireAdmin, async (req, res) => {
  * GET /api/coupons
  * Returns all coupons.
  */
-router.get("/", requireAuth, (req, res) => {
+router.get("/", requireAdmin, (req, res) => {
   res.json(db.coupons);
 });
 
@@ -74,9 +73,6 @@ router.put("/:code", requireAdmin, async (req, res) => {
     return res.status(400).json({ error: "discountType must be 'percent' or 'fixed'" });
 
   try {
-    await stripe.promotionCodes.update(coupon.stripePromoCodeId, { active: false });
-    await stripe.coupons.del(coupon.stripeCouponId);
-
     const newStripeCoupon = await stripe.coupons.create(
       discountType === "percent"
         ? { percent_off: discountValue, duration: "once" }
@@ -86,6 +82,9 @@ router.put("/:code", requireAdmin, async (req, res) => {
       promotion: { type: "coupon", coupon: newStripeCoupon.id },
       code: coupon.code,
     });
+
+    await stripe.promotionCodes.update(coupon.stripePromoCodeId, { active: false });
+    await stripe.coupons.del(coupon.stripeCouponId);
 
     coupon.discountType = discountType;
     coupon.discountValue = discountValue;

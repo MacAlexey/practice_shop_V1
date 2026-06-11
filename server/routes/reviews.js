@@ -2,6 +2,7 @@ import { Router } from "express";
 import { body, validationResult } from "express-validator";
 import { db } from "../db.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { requireAdmin } from "../middleware/requireAdmin.js";
 
 function validate(req, res) {
   const errors = validationResult(req);
@@ -13,6 +14,14 @@ function validate(req, res) {
 }
 
 const router = Router();
+
+/**
+ * GET /api/reviews
+ * Returns all reviews (admin only).
+ */
+router.get("/", requireAdmin, (req, res) => {
+  res.json(db.reviews);
+});
 
 /**
  * GET /api/reviews/ratings

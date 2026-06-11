@@ -41,7 +41,7 @@ router.post("/:id/refund", requireAdmin, async (req, res) => {
     res.json({ refundId: refund.id, status: refund.status });
   } catch (err) {
     order.paymentStatus = "paid";
-    report.status = "open";
+    report.status = "in_progress";
     res.status(500).json({ error: err.message });
   }
 });
@@ -60,6 +60,10 @@ router.post("/", requireAuth, async (req, res) => {
   if (!order) return res.status(404).json({ error: "Order not found" });
   if (order.userId !== req.user.id)
     return res.status(403).json({ error: "Access denied" });
+  if (order.paymentStatus === "refunding")
+    return res.status(400).json({ error: "Refund already in progress for this order" });
+  if (order.paymentStatus === "refunded")
+    return res.status(400).json({ error: "Order already refunded" });
   if (order.paymentStatus !== "paid")
     return res.status(400).json({ error: "Can only report paid orders" });
 
@@ -80,7 +84,11 @@ router.post("/", requireAuth, async (req, res) => {
 
   db.reports.push(report);
 
-  if (order.stripePaymentIntentId) {
+  const AUTO_REFUND_WINDOW_MS = 30 * 60 * 1000;
+  const withinAutoWindow = order.paidAt &&
+    Date.now() - new Date(order.paidAt).getTime() <= AUTO_REFUND_WINDOW_MS;
+
+  if (order.stripePaymentIntentId && withinAutoWindow) {
     report.status = "in_progress";
     order.paymentStatus = "refunding";
     try {

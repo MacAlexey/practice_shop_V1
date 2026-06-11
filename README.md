@@ -183,7 +183,7 @@ npm run dev
 | GET | /api/reports | Get reports for current user |
 | POST | /api/reports | Submit a report for a paid order |
 | POST | /api/reports/:id/refund | Issue Stripe refund for a report |
-| GET | /api/coupons | List all coupons |
+| GET | /api/coupons | List all coupons (admin) |
 | POST | /api/coupons | Create coupon (admin, synced with Stripe) |
 | PUT | /api/coupons/:code | Update coupon (admin, synced with Stripe) |
 | DELETE | /api/coupons/:code | Delete coupon (admin, synced with Stripe) |
@@ -193,6 +193,7 @@ npm run dev
 | PUT | /api/products/:id | Update product (admin) |
 | DELETE | /api/products/:id | Delete product (admin) |
 | GET | /api/products/:id/reviews | Get reviews + average rating for a product |
+| GET | /api/reviews | Get all reviews (admin) |
 | GET | /api/reviews/ratings | Get average ratings for all products (batch) |
 | GET | /api/reviews/my | Get current user's reviews |
 | POST | /api/reviews | Submit a review (requireAuth) |
