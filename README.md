@@ -39,8 +39,15 @@ A shopping cart application built with React, Vite, Tailwind CSS, and Node.js/Ex
 
 **Reports & Refunds**
 - Users can submit a report for any paid order (reason + description)
+- Auto-refund within 30 minutes of payment; after that requires admin approval
+- Report flow: open → in_progress → resolved | rejected
 - Refund endpoint triggers Stripe refund via payment intent ID
-- Report status updates to "resolved" after refund is issued
+
+**Admin Panel**
+- Protected page at `/admin` — accessible only to users with `role: "admin"`
+- Reports tab: view all reports, start review, approve refund, reject
+- Users tab: view all registered users with roles and verification status
+- Coupons tab: create, edit, and delete coupons (synced with Stripe)
 
 **Auth**
 - Register / login / logout
@@ -85,10 +92,15 @@ src/
 │   ├── orders.js          # Orders API calls
 │   ├── payments.js        # Payments API calls
 │   ├── products.js        # Products API calls
+│   ├── coupons.js         # Coupons API calls
 │   ├── reports.js         # Reports API calls
-│   └── reviews.js         # Reviews API calls
+│   ├── reviews.js         # Reviews API calls
+│   └── users.js           # Users API calls
 ├── constants.js           # Shared frontend constants (currency)
 ├── components/
+│   ├── AdminCouponsTab.jsx # Admin coupons tab
+│   ├── AdminReportsTab.jsx # Admin reports tab
+│   ├── AdminUsersTab.jsx  # Admin users tab
 │   ├── Cart.jsx           # Cart item list
 │   ├── CartDropdown.jsx   # Navbar cart dropdown
 │   ├── Navbar.jsx         # Navigation bar
@@ -102,6 +114,7 @@ src/
 ├── hooks/
 │   └── useProductFilter.js # Custom hook for search/sort/filter
 ├── pages/
+│   ├── AdminPage.jsx
 │   ├── CartPage.jsx
 │   ├── ChangePasswordPage.jsx
 │   ├── CheckoutPage.jsx
@@ -159,6 +172,15 @@ npm run dev
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:3001
 - Swagger UI: http://localhost:3001/api-docs
+- Admin Panel: http://localhost:5173/admin
+
+## Default Accounts
+
+| Role  | Email          | Password |
+|-------|----------------|----------|
+| Admin | admin@shop.com | admin123 |
+
+> OTP code for registration and password reset: `1234`
 
 ## API Endpoints
 
@@ -205,7 +227,7 @@ npm run dev
 | DELETE | /api/cart/items/:productId | Remove item from cart |
 | POST | /api/cart/merge | Merge guest cart into user cart |
 | DELETE | /api/cart | Clear cart |
-| GET | /api/users | Get all users (dev only) |
+| GET | /api/users | Get all users (admin) |
 
 > **Note:** Backend uses in-memory storage — data resets on server restart.
 > Public endpoints: `/api/auth/*`, `GET /api/products`, `GET /api/products/:id`, `GET /api/products/:id/reviews`, `GET /api/reviews/ratings`. All others require a valid access token. Admin endpoints require `role: "admin"` in the JWT payload.

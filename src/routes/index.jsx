@@ -13,6 +13,7 @@ import ForgotPage from "../pages/ForgotPage";
 import VerifyOtpForgotPage from "../pages/VerifyOtpForgotPage";
 import ChangePasswordPage from "../pages/ChangePasswordPage";
 import ProductPage from "../pages/ProductPage";
+import AdminPage from "../pages/AdminPage";
 
 export default function AppRoutes() {
   return (
@@ -36,6 +37,9 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
+
+      {/* Admin */}
+      <Route path="/admin" element={<AdminPage />} />
 
       {/* Fallback */}
       <Route path="*" element={<NotFoundPage />} />

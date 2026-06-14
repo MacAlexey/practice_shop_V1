@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { db } from "../db.js";
-import { requireAuth } from "../middleware/requireAuth.js";
+import { requireAdmin } from "../middleware/requireAdmin.js";
 
 const router = Router();
 
 /**
  * GET /api/users
- * Returns all users without passwords. For development use only.
+ * Returns all users without passwords (admin only).
  */
-router.get("/", requireAuth, (req, res) => {
+router.get("/", requireAdmin, (req, res) => {
   const safeUsers = db.users.map(({ password, ...rest }) => rest);
   res.json(safeUsers);
 });

@@ -40,6 +40,15 @@ export default function Navbar() {
             Orders
           </Link>
 
+          {user?.role === "admin" && (
+            <Link
+              to="/admin"
+              className="text-gray-300 hover:text-indigo-400 transition"
+            >
+              Admin Panel
+            </Link>
+          )}
+
           {user ? (
             <Link
               to="/profile"

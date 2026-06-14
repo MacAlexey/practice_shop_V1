@@ -111,10 +111,22 @@ router.post("/", requireAuth, async (req, res) => {
 
 /**
  * GET /api/reports
- * Returns all reports (admin) or own reports (user).
+ * Returns all reports enriched with user and order data (admin) or own reports (user).
  */
 router.get("/", requireAuth, (req, res) => {
-  if (req.user.role === "admin") return res.json(db.reports);
+  if (req.user.role === "admin") {
+    const enriched = db.reports.map((r) => {
+      const order = db.orders.find((o) => o.id === r.orderId);
+      const user = db.users.find((u) => u.id === r.userId);
+      return {
+        ...r,
+        userName: user?.name || "Unknown",
+        userEmail: user?.email || "Unknown",
+        orderTotal: order?.finalPrice ?? order?.totalPrice ?? 0,
+      };
+    });
+    return res.json(enriched);
+  }
   res.json(db.reports.filter((r) => r.userId === req.user.id));
 });
 
