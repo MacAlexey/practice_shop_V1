@@ -29,17 +29,11 @@ router.post("/", requireAdmin, async (req, res) => {
         : { amount_off: discountValue, currency: CURRENCY_VND, duration: "once" }
     );
 
-    const promoCode = await stripe.promotionCodes.create({
-      promotion: { type: "coupon", coupon: stripeCoupon.id },
-      code,
-    });
-
     const coupon = {
       code,
       discountType,
       discountValue,
       stripeCouponId: stripeCoupon.id,
-      stripePromoCodeId: promoCode.id,
       createdAt: new Date().toISOString(),
     };
 
@@ -78,18 +72,12 @@ router.put("/:code", requireAdmin, async (req, res) => {
         ? { percent_off: discountValue, duration: "once" }
         : { amount_off: discountValue, currency: CURRENCY_VND, duration: "once" }
     );
-    const newPromoCode = await stripe.promotionCodes.create({
-      promotion: { type: "coupon", coupon: newStripeCoupon.id },
-      code: coupon.code,
-    });
 
-    await stripe.promotionCodes.update(coupon.stripePromoCodeId, { active: false });
     await stripe.coupons.del(coupon.stripeCouponId);
 
     coupon.discountType = discountType;
     coupon.discountValue = discountValue;
     coupon.stripeCouponId = newStripeCoupon.id;
-    coupon.stripePromoCodeId = newPromoCode.id;
 
     res.json(coupon);
   } catch (err) {
@@ -108,7 +96,6 @@ router.delete("/:code", requireAdmin, async (req, res) => {
   const coupon = db.coupons[index];
 
   try {
-    await stripe.promotionCodes.update(coupon.stripePromoCodeId, { active: false });
     await stripe.coupons.del(coupon.stripeCouponId);
     db.coupons.splice(index, 1);
     res.json({ message: "Coupon deleted" });

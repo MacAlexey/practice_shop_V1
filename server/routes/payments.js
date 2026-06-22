@@ -35,12 +35,6 @@ router.post("/create-session", requireAuth, async (req, res) => {
   if (couponCode && !coupon)
     return res.status(400).json({ error: "Invalid coupon code" });
 
-  if (coupon) {
-    const stripePromo = await stripe.promotionCodes.retrieve(coupon.stripePromoCodeId);
-    if (!stripePromo.active)
-      return res.status(400).json({ error: "Coupon is no longer active" });
-  }
-
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: order.items.map((item) => ({
